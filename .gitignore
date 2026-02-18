@@ -1,0 +1,19 @@
+# Data and checkpoints (large files, not versioned)
+baseline_continuous/data/
+baseline_continuous/checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+
+# WandB
+wandb/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
