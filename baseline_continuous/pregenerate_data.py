@@ -68,6 +68,7 @@ def get_current_data_config(args):
         'dependency_window': cfg.dependency_window,
         'num_matrices': cfg.num_matrices,
         'noise_scale': cfg.noise_scale,
+        'alpha': cfg.alpha,
         'seed': cfg.seed,
         'train_init_mode': cfg.train_init_mode,
         'val_init_mode': cfg.val_init_mode,
@@ -131,7 +132,8 @@ def main():
         dependency_window=cfg.dependency_window,
         num_matrices=cfg.num_matrices,
         seed=cfg.seed,
-        noise_scale=cfg.noise_scale
+        noise_scale=cfg.noise_scale,
+        alpha=cfg.alpha
     )
 
     # Save generator config for verification at load time

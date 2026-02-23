@@ -1,0 +1,731 @@
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/admin/.netrc.
+wandb: Currently logged in as: 1113488238 (1113488238-dalian-university-of-technology) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run y5wswnmj
+wandb: Tracking run with wandb version 0.24.0
+wandb: Run data is saved locally in /home/admin/lyuyuhuan/AO-GPT-MDM/wandb/run-20260223_114420-y5wswnmj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ar-shuffled
+wandb: ⭐️ View project at https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v4
+wandb: 🚀 View run at https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v4/runs/y5wswnmj
+============================================================
+ContinuousAOGPT — AR Training (shuffled)
+============================================================
+
+Loading data from disk...
+[disk] train=500000, val=20000, test=20000
+  976 iters/epoch × 50 epochs = 48800 total iters
+
+Creating model...
+number of parameters: 4.05M
+num decayed parameter tensors: 26, with 4,043,264 parameters
+num non-decayed parameter tensors: 41, with 19,072 parameters
+using fused AdamW: True
+
+Starting training for 50 epochs...
+epoch 1/50 | iter      0 | loss 1.0004 | lr 0.00e+00
+epoch 1/50 | iter    100 | loss 0.7311 | lr 4.10e-05
+epoch 1/50 | iter    200 | loss 0.3085 | lr 8.20e-05
+epoch 1/50 | iter    300 | loss 0.1767 | lr 1.23e-04
+epoch 1/50 | iter    400 | loss 0.1174 | lr 1.64e-04
+epoch 1/50 | iter    500 | loss 0.0959 | lr 2.05e-04
+  [eval] val_loss: 0.0970 | val_cos_sim: 0.9030
+  [save] Best model saved (val_loss: 0.0970)
+epoch 1/50 | iter    600 | loss 0.0854 | lr 2.46e-04
+epoch 1/50 | iter    700 | loss 0.0780 | lr 2.87e-04
+epoch 1/50 | iter    800 | loss 0.0743 | lr 3.28e-04
+epoch 1/50 | iter    900 | loss 0.0720 | lr 3.69e-04
+epoch 2/50 | iter   1000 | loss 0.0703 | lr 4.10e-04
+  [eval] val_loss: 0.0638 | val_cos_sim: 0.9362
+  [save] Best model saved (val_loss: 0.0638)
+epoch 2/50 | iter   1100 | loss 0.0683 | lr 4.51e-04
+epoch 2/50 | iter   1200 | loss 0.0676 | lr 4.92e-04
+epoch 2/50 | iter   1300 | loss 0.0665 | lr 5.33e-04
+epoch 2/50 | iter   1400 | loss 0.0661 | lr 5.74e-04
+epoch 2/50 | iter   1500 | loss 0.0651 | lr 6.15e-04
+  [eval] val_loss: 0.0585 | val_cos_sim: 0.9415
+  [save] Best model saved (val_loss: 0.0585)
+epoch 2/50 | iter   1600 | loss 0.0648 | lr 6.56e-04
+epoch 2/50 | iter   1700 | loss 0.0643 | lr 6.97e-04
+epoch 2/50 | iter   1800 | loss 0.0637 | lr 7.38e-04
+epoch 2/50 | iter   1900 | loss 0.0644 | lr 7.79e-04
+epoch 3/50 | iter   2000 | loss 0.0630 | lr 8.20e-04
+  [eval] val_loss: 0.0562 | val_cos_sim: 0.9438
+  [save] Best model saved (val_loss: 0.0562)
+epoch 3/50 | iter   2100 | loss 0.0636 | lr 8.61e-04
+epoch 3/50 | iter   2200 | loss 0.0626 | lr 9.02e-04
+epoch 3/50 | iter   2300 | loss 0.0627 | lr 9.43e-04
+epoch 3/50 | iter   2400 | loss 0.0620 | lr 9.84e-04
+epoch 3/50 | iter   2500 | loss 0.0617 | lr 1.00e-03
+  [eval] val_loss: 0.0548 | val_cos_sim: 0.9452
+  [save] Best model saved (val_loss: 0.0548)
+epoch 3/50 | iter   2600 | loss 0.0612 | lr 1.00e-03
+epoch 3/50 | iter   2700 | loss 0.0613 | lr 1.00e-03
+epoch 3/50 | iter   2800 | loss 0.0614 | lr 1.00e-03
+epoch 3/50 | iter   2900 | loss 0.0606 | lr 1.00e-03
+epoch 4/50 | iter   3000 | loss 0.0601 | lr 1.00e-03
+  [eval] val_loss: 0.0537 | val_cos_sim: 0.9463
+  [save] Best model saved (val_loss: 0.0537)
+epoch 4/50 | iter   3100 | loss 0.0609 | lr 1.00e-03
+epoch 4/50 | iter   3200 | loss 0.0607 | lr 9.99e-04
+epoch 4/50 | iter   3300 | loss 0.0595 | lr 9.99e-04
+epoch 4/50 | iter   3400 | loss 0.0602 | lr 9.99e-04
+epoch 4/50 | iter   3500 | loss 0.0598 | lr 9.99e-04
+  [eval] val_loss: 0.0527 | val_cos_sim: 0.9473
+  [save] Best model saved (val_loss: 0.0527)
+epoch 4/50 | iter   3600 | loss 0.0596 | lr 9.99e-04
+epoch 4/50 | iter   3700 | loss 0.0588 | lr 9.98e-04
+epoch 4/50 | iter   3800 | loss 0.0595 | lr 9.98e-04
+epoch 4/50 | iter   3900 | loss 0.0598 | lr 9.98e-04
+epoch 5/50 | iter   4000 | loss 0.0595 | lr 9.97e-04
+  [eval] val_loss: 0.0521 | val_cos_sim: 0.9479
+  [save] Best model saved (val_loss: 0.0521)
+epoch 5/50 | iter   4100 | loss 0.0590 | lr 9.97e-04
+epoch 5/50 | iter   4200 | loss 0.0589 | lr 9.97e-04
+epoch 5/50 | iter   4300 | loss 0.0587 | lr 9.96e-04
+epoch 5/50 | iter   4400 | loss 0.0586 | lr 9.96e-04
+epoch 5/50 | iter   4500 | loss 0.0586 | lr 9.96e-04
+  [eval] val_loss: 0.0517 | val_cos_sim: 0.9483
+  [save] Best model saved (val_loss: 0.0517)
+epoch 5/50 | iter   4600 | loss 0.0587 | lr 9.95e-04
+epoch 5/50 | iter   4700 | loss 0.0589 | lr 9.95e-04
+epoch 5/50 | iter   4800 | loss 0.0587 | lr 9.94e-04
+epoch 6/50 | iter   4900 | loss 0.0577 | lr 9.94e-04
+epoch 6/50 | iter   5000 | loss 0.0584 | lr 9.93e-04
+  [eval] val_loss: 0.0513 | val_cos_sim: 0.9487
+  [save] Best model saved (val_loss: 0.0513)
+epoch 6/50 | iter   5100 | loss 0.0579 | lr 9.93e-04
+epoch 6/50 | iter   5200 | loss 0.0584 | lr 9.92e-04
+epoch 6/50 | iter   5300 | loss 0.0582 | lr 9.92e-04
+epoch 6/50 | iter   5400 | loss 0.0586 | lr 9.91e-04
+epoch 6/50 | iter   5500 | loss 0.0582 | lr 9.90e-04
+  [eval] val_loss: 0.0510 | val_cos_sim: 0.9490
+  [save] Best model saved (val_loss: 0.0510)
+epoch 6/50 | iter   5600 | loss 0.0590 | lr 9.90e-04
+epoch 6/50 | iter   5700 | loss 0.0585 | lr 9.89e-04
+epoch 6/50 | iter   5800 | loss 0.0578 | lr 9.88e-04
+epoch 7/50 | iter   5900 | loss 0.0583 | lr 9.88e-04
+epoch 7/50 | iter   6000 | loss 0.0581 | lr 9.87e-04
+  [eval] val_loss: 0.0508 | val_cos_sim: 0.9492
+  [save] Best model saved (val_loss: 0.0508)
+epoch 7/50 | iter   6100 | loss 0.0582 | lr 9.86e-04
+epoch 7/50 | iter   6200 | loss 0.0580 | lr 9.85e-04
+epoch 7/50 | iter   6300 | loss 0.0576 | lr 9.85e-04
+epoch 7/50 | iter   6400 | loss 0.0580 | lr 9.84e-04
+epoch 7/50 | iter   6500 | loss 0.0575 | lr 9.83e-04
+  [eval] val_loss: 0.0506 | val_cos_sim: 0.9494
+  [save] Best model saved (val_loss: 0.0506)
+epoch 7/50 | iter   6600 | loss 0.0578 | lr 9.82e-04
+epoch 7/50 | iter   6700 | loss 0.0581 | lr 9.81e-04
+epoch 7/50 | iter   6800 | loss 0.0570 | lr 9.81e-04
+epoch 8/50 | iter   6900 | loss 0.0577 | lr 9.80e-04
+epoch 8/50 | iter   7000 | loss 0.0578 | lr 9.79e-04
+  [eval] val_loss: 0.0505 | val_cos_sim: 0.9495
+  [save] Best model saved (val_loss: 0.0505)
+epoch 8/50 | iter   7100 | loss 0.0573 | lr 9.78e-04
+epoch 8/50 | iter   7200 | loss 0.0580 | lr 9.77e-04
+epoch 8/50 | iter   7300 | loss 0.0578 | lr 9.76e-04
+epoch 8/50 | iter   7400 | loss 0.0575 | lr 9.75e-04
+epoch 8/50 | iter   7500 | loss 0.0575 | lr 9.74e-04
+  [eval] val_loss: 0.0504 | val_cos_sim: 0.9496
+  [save] Best model saved (val_loss: 0.0504)
+epoch 8/50 | iter   7600 | loss 0.0572 | lr 9.73e-04
+epoch 8/50 | iter   7700 | loss 0.0578 | lr 9.72e-04
+epoch 8/50 | iter   7800 | loss 0.0577 | lr 9.71e-04
+epoch 9/50 | iter   7900 | loss 0.0573 | lr 9.70e-04
+epoch 9/50 | iter   8000 | loss 0.0573 | lr 9.68e-04
+  [eval] val_loss: 0.0503 | val_cos_sim: 0.9497
+  [save] Best model saved (val_loss: 0.0503)
+epoch 9/50 | iter   8100 | loss 0.0573 | lr 9.67e-04
+epoch 9/50 | iter   8200 | loss 0.0581 | lr 9.66e-04
+epoch 9/50 | iter   8300 | loss 0.0576 | lr 9.65e-04
+epoch 9/50 | iter   8400 | loss 0.0567 | lr 9.64e-04
+epoch 9/50 | iter   8500 | loss 0.0571 | lr 9.63e-04
+  [eval] val_loss: 0.0502 | val_cos_sim: 0.9498
+  [save] Best model saved (val_loss: 0.0502)
+epoch 9/50 | iter   8600 | loss 0.0568 | lr 9.61e-04
+epoch 9/50 | iter   8700 | loss 0.0576 | lr 9.60e-04
+epoch 10/50 | iter   8800 | loss 0.0569 | lr 9.59e-04
+epoch 10/50 | iter   8900 | loss 0.0568 | lr 9.58e-04
+epoch 10/50 | iter   9000 | loss 0.0573 | lr 9.56e-04
+  [eval] val_loss: 0.0502 | val_cos_sim: 0.9498
+  [save] Best model saved (val_loss: 0.0502)
+epoch 10/50 | iter   9100 | loss 0.0575 | lr 9.55e-04
+epoch 10/50 | iter   9200 | loss 0.0570 | lr 9.54e-04
+epoch 10/50 | iter   9300 | loss 0.0577 | lr 9.52e-04
+epoch 10/50 | iter   9400 | loss 0.0574 | lr 9.51e-04
+epoch 10/50 | iter   9500 | loss 0.0574 | lr 9.49e-04
+  [eval] val_loss: 0.0501 | val_cos_sim: 0.9499
+  [save] Best model saved (val_loss: 0.0501)
+epoch 10/50 | iter   9600 | loss 0.0570 | lr 9.48e-04
+epoch 10/50 | iter   9700 | loss 0.0570 | lr 9.47e-04
+epoch 11/50 | iter   9800 | loss 0.0572 | lr 9.45e-04
+epoch 11/50 | iter   9900 | loss 0.0569 | lr 9.44e-04
+epoch 11/50 | iter  10000 | loss 0.0574 | lr 9.42e-04
+  [eval] val_loss: 0.0501 | val_cos_sim: 0.9499
+  [save] Best model saved (val_loss: 0.0501)
+epoch 11/50 | iter  10100 | loss 0.0577 | lr 9.41e-04
+epoch 11/50 | iter  10200 | loss 0.0565 | lr 9.39e-04
+epoch 11/50 | iter  10300 | loss 0.0572 | lr 9.38e-04
+epoch 11/50 | iter  10400 | loss 0.0569 | lr 9.36e-04
+epoch 11/50 | iter  10500 | loss 0.0565 | lr 9.35e-04
+  [eval] val_loss: 0.0500 | val_cos_sim: 0.9500
+  [save] Best model saved (val_loss: 0.0500)
+epoch 11/50 | iter  10600 | loss 0.0570 | lr 9.33e-04
+epoch 11/50 | iter  10700 | loss 0.0565 | lr 9.31e-04
+epoch 12/50 | iter  10800 | loss 0.0567 | lr 9.30e-04
+epoch 12/50 | iter  10900 | loss 0.0572 | lr 9.28e-04
+epoch 12/50 | iter  11000 | loss 0.0566 | lr 9.26e-04
+  [eval] val_loss: 0.0500 | val_cos_sim: 0.9500
+  [save] Best model saved (val_loss: 0.0500)
+epoch 12/50 | iter  11100 | loss 0.0574 | lr 9.25e-04
+epoch 12/50 | iter  11200 | loss 0.0574 | lr 9.23e-04
+epoch 12/50 | iter  11300 | loss 0.0570 | lr 9.21e-04
+epoch 12/50 | iter  11400 | loss 0.0567 | lr 9.20e-04
+epoch 12/50 | iter  11500 | loss 0.0563 | lr 9.18e-04
+  [eval] val_loss: 0.0500 | val_cos_sim: 0.9500
+  [save] Best model saved (val_loss: 0.0500)
+epoch 12/50 | iter  11600 | loss 0.0566 | lr 9.16e-04
+epoch 12/50 | iter  11700 | loss 0.0569 | lr 9.14e-04
+epoch 13/50 | iter  11800 | loss 0.0565 | lr 9.12e-04
+epoch 13/50 | iter  11900 | loss 0.0567 | lr 9.11e-04
+epoch 13/50 | iter  12000 | loss 0.0567 | lr 9.09e-04
+  [eval] val_loss: 0.0500 | val_cos_sim: 0.9500
+  [save] Best model saved (val_loss: 0.0500)
+epoch 13/50 | iter  12100 | loss 0.0569 | lr 9.07e-04
+epoch 13/50 | iter  12200 | loss 0.0560 | lr 9.05e-04
+epoch 13/50 | iter  12300 | loss 0.0570 | lr 9.03e-04
+epoch 13/50 | iter  12400 | loss 0.0567 | lr 9.01e-04
+epoch 13/50 | iter  12500 | loss 0.0570 | lr 8.99e-04
+  [eval] val_loss: 0.0499 | val_cos_sim: 0.9501
+  [save] Best model saved (val_loss: 0.0499)
+epoch 13/50 | iter  12600 | loss 0.0570 | lr 8.97e-04
+epoch 14/50 | iter  12700 | loss 0.0566 | lr 8.96e-04
+epoch 14/50 | iter  12800 | loss 0.0568 | lr 8.94e-04
+epoch 14/50 | iter  12900 | loss 0.0569 | lr 8.92e-04
+epoch 14/50 | iter  13000 | loss 0.0569 | lr 8.90e-04
+  [eval] val_loss: 0.0499 | val_cos_sim: 0.9501
+  [save] Best model saved (val_loss: 0.0499)
+epoch 14/50 | iter  13100 | loss 0.0567 | lr 8.88e-04
+epoch 14/50 | iter  13200 | loss 0.0561 | lr 8.86e-04
+epoch 14/50 | iter  13300 | loss 0.0571 | lr 8.84e-04
+epoch 14/50 | iter  13400 | loss 0.0564 | lr 8.81e-04
+epoch 14/50 | iter  13500 | loss 0.0562 | lr 8.79e-04
+  [eval] val_loss: 0.0499 | val_cos_sim: 0.9501
+  [save] Best model saved (val_loss: 0.0499)
+epoch 14/50 | iter  13600 | loss 0.0568 | lr 8.77e-04
+epoch 15/50 | iter  13700 | loss 0.0565 | lr 8.75e-04
+epoch 15/50 | iter  13800 | loss 0.0566 | lr 8.73e-04
+epoch 15/50 | iter  13900 | loss 0.0564 | lr 8.71e-04
+epoch 15/50 | iter  14000 | loss 0.0559 | lr 8.69e-04
+  [eval] val_loss: 0.0499 | val_cos_sim: 0.9501
+  [save] Best model saved (val_loss: 0.0499)
+epoch 15/50 | iter  14100 | loss 0.0567 | lr 8.67e-04
+epoch 15/50 | iter  14200 | loss 0.0568 | lr 8.65e-04
+epoch 15/50 | iter  14300 | loss 0.0563 | lr 8.62e-04
+epoch 15/50 | iter  14400 | loss 0.0564 | lr 8.60e-04
+epoch 15/50 | iter  14500 | loss 0.0574 | lr 8.58e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 15/50 | iter  14600 | loss 0.0562 | lr 8.56e-04
+epoch 16/50 | iter  14700 | loss 0.0568 | lr 8.53e-04
+epoch 16/50 | iter  14800 | loss 0.0561 | lr 8.51e-04
+epoch 16/50 | iter  14900 | loss 0.0569 | lr 8.49e-04
+epoch 16/50 | iter  15000 | loss 0.0565 | lr 8.47e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 16/50 | iter  15100 | loss 0.0570 | lr 8.44e-04
+epoch 16/50 | iter  15200 | loss 0.0571 | lr 8.42e-04
+epoch 16/50 | iter  15300 | loss 0.0566 | lr 8.40e-04
+epoch 16/50 | iter  15400 | loss 0.0563 | lr 8.37e-04
+epoch 16/50 | iter  15500 | loss 0.0562 | lr 8.35e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+epoch 16/50 | iter  15600 | loss 0.0565 | lr 8.33e-04
+epoch 17/50 | iter  15700 | loss 0.0566 | lr 8.30e-04
+epoch 17/50 | iter  15800 | loss 0.0562 | lr 8.28e-04
+epoch 17/50 | iter  15900 | loss 0.0563 | lr 8.25e-04
+epoch 17/50 | iter  16000 | loss 0.0570 | lr 8.23e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 17/50 | iter  16100 | loss 0.0571 | lr 8.21e-04
+epoch 17/50 | iter  16200 | loss 0.0562 | lr 8.18e-04
+epoch 17/50 | iter  16300 | loss 0.0566 | lr 8.16e-04
+epoch 17/50 | iter  16400 | loss 0.0569 | lr 8.13e-04
+epoch 17/50 | iter  16500 | loss 0.0566 | lr 8.11e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 18/50 | iter  16600 | loss 0.0568 | lr 8.08e-04
+epoch 18/50 | iter  16700 | loss 0.0563 | lr 8.06e-04
+epoch 18/50 | iter  16800 | loss 0.0558 | lr 8.03e-04
+epoch 18/50 | iter  16900 | loss 0.0564 | lr 8.01e-04
+epoch 18/50 | iter  17000 | loss 0.0566 | lr 7.98e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 18/50 | iter  17100 | loss 0.0560 | lr 7.96e-04
+epoch 18/50 | iter  17200 | loss 0.0563 | lr 7.93e-04
+epoch 18/50 | iter  17300 | loss 0.0563 | lr 7.90e-04
+epoch 18/50 | iter  17400 | loss 0.0560 | lr 7.88e-04
+epoch 18/50 | iter  17500 | loss 0.0573 | lr 7.85e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+epoch 19/50 | iter  17600 | loss 0.0561 | lr 7.83e-04
+epoch 19/50 | iter  17700 | loss 0.0563 | lr 7.80e-04
+epoch 19/50 | iter  17800 | loss 0.0557 | lr 7.77e-04
+epoch 19/50 | iter  17900 | loss 0.0560 | lr 7.75e-04
+epoch 19/50 | iter  18000 | loss 0.0559 | lr 7.72e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+epoch 19/50 | iter  18100 | loss 0.0564 | lr 7.70e-04
+epoch 19/50 | iter  18200 | loss 0.0562 | lr 7.67e-04
+epoch 19/50 | iter  18300 | loss 0.0574 | lr 7.64e-04
+epoch 19/50 | iter  18400 | loss 0.0561 | lr 7.61e-04
+epoch 19/50 | iter  18500 | loss 0.0561 | lr 7.59e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 20/50 | iter  18600 | loss 0.0565 | lr 7.56e-04
+epoch 20/50 | iter  18700 | loss 0.0563 | lr 7.53e-04
+epoch 20/50 | iter  18800 | loss 0.0562 | lr 7.51e-04
+epoch 20/50 | iter  18900 | loss 0.0559 | lr 7.48e-04
+epoch 20/50 | iter  19000 | loss 0.0564 | lr 7.45e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 20/50 | iter  19100 | loss 0.0557 | lr 7.42e-04
+epoch 20/50 | iter  19200 | loss 0.0566 | lr 7.40e-04
+epoch 20/50 | iter  19300 | loss 0.0565 | lr 7.37e-04
+epoch 20/50 | iter  19400 | loss 0.0570 | lr 7.34e-04
+epoch 20/50 | iter  19500 | loss 0.0562 | lr 7.31e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 21/50 | iter  19600 | loss 0.0561 | lr 7.29e-04
+epoch 21/50 | iter  19700 | loss 0.0565 | lr 7.26e-04
+epoch 21/50 | iter  19800 | loss 0.0559 | lr 7.23e-04
+epoch 21/50 | iter  19900 | loss 0.0561 | lr 7.20e-04
+epoch 21/50 | iter  20000 | loss 0.0561 | lr 7.17e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 21/50 | iter  20100 | loss 0.0564 | lr 7.14e-04
+epoch 21/50 | iter  20200 | loss 0.0563 | lr 7.12e-04
+epoch 21/50 | iter  20300 | loss 0.0568 | lr 7.09e-04
+epoch 21/50 | iter  20400 | loss 0.0561 | lr 7.06e-04
+epoch 22/50 | iter  20500 | loss 0.0561 | lr 7.03e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 22/50 | iter  20600 | loss 0.0567 | lr 7.00e-04
+epoch 22/50 | iter  20700 | loss 0.0561 | lr 6.97e-04
+epoch 22/50 | iter  20800 | loss 0.0564 | lr 6.94e-04
+epoch 22/50 | iter  20900 | loss 0.0560 | lr 6.91e-04
+epoch 22/50 | iter  21000 | loss 0.0563 | lr 6.89e-04
+  [eval] val_loss: 0.0498 | val_cos_sim: 0.9502
+  [save] Best model saved (val_loss: 0.0498)
+epoch 22/50 | iter  21100 | loss 0.0557 | lr 6.86e-04
+epoch 22/50 | iter  21200 | loss 0.0556 | lr 6.83e-04
+epoch 22/50 | iter  21300 | loss 0.0564 | lr 6.80e-04
+epoch 22/50 | iter  21400 | loss 0.0562 | lr 6.77e-04
+epoch 23/50 | iter  21500 | loss 0.0564 | lr 6.74e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 23/50 | iter  21600 | loss 0.0567 | lr 6.71e-04
+epoch 23/50 | iter  21700 | loss 0.0566 | lr 6.68e-04
+epoch 23/50 | iter  21800 | loss 0.0560 | lr 6.65e-04
+epoch 23/50 | iter  21900 | loss 0.0563 | lr 6.62e-04
+epoch 23/50 | iter  22000 | loss 0.0562 | lr 6.59e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+epoch 23/50 | iter  22100 | loss 0.0564 | lr 6.56e-04
+epoch 23/50 | iter  22200 | loss 0.0561 | lr 6.53e-04
+epoch 23/50 | iter  22300 | loss 0.0562 | lr 6.50e-04
+epoch 23/50 | iter  22400 | loss 0.0562 | lr 6.47e-04
+epoch 24/50 | iter  22500 | loss 0.0557 | lr 6.44e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 24/50 | iter  22600 | loss 0.0559 | lr 6.41e-04
+epoch 24/50 | iter  22700 | loss 0.0562 | lr 6.38e-04
+epoch 24/50 | iter  22800 | loss 0.0564 | lr 6.35e-04
+epoch 24/50 | iter  22900 | loss 0.0565 | lr 6.32e-04
+epoch 24/50 | iter  23000 | loss 0.0555 | lr 6.29e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 24/50 | iter  23100 | loss 0.0561 | lr 6.26e-04
+epoch 24/50 | iter  23200 | loss 0.0558 | lr 6.23e-04
+epoch 24/50 | iter  23300 | loss 0.0560 | lr 6.20e-04
+epoch 24/50 | iter  23400 | loss 0.0571 | lr 6.17e-04
+epoch 25/50 | iter  23500 | loss 0.0564 | lr 6.14e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 25/50 | iter  23600 | loss 0.0561 | lr 6.11e-04
+epoch 25/50 | iter  23700 | loss 0.0555 | lr 6.08e-04
+epoch 25/50 | iter  23800 | loss 0.0564 | lr 6.05e-04
+epoch 25/50 | iter  23900 | loss 0.0558 | lr 6.02e-04
+epoch 25/50 | iter  24000 | loss 0.0556 | lr 5.99e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 25/50 | iter  24100 | loss 0.0563 | lr 5.96e-04
+epoch 25/50 | iter  24200 | loss 0.0557 | lr 5.93e-04
+epoch 25/50 | iter  24300 | loss 0.0560 | lr 5.90e-04
+epoch 26/50 | iter  24400 | loss 0.0552 | lr 5.87e-04
+epoch 26/50 | iter  24500 | loss 0.0558 | lr 5.84e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 26/50 | iter  24600 | loss 0.0557 | lr 5.81e-04
+epoch 26/50 | iter  24700 | loss 0.0555 | lr 5.78e-04
+epoch 26/50 | iter  24800 | loss 0.0557 | lr 5.75e-04
+epoch 26/50 | iter  24900 | loss 0.0557 | lr 5.72e-04
+epoch 26/50 | iter  25000 | loss 0.0559 | lr 5.69e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 26/50 | iter  25100 | loss 0.0563 | lr 5.66e-04
+epoch 26/50 | iter  25200 | loss 0.0560 | lr 5.63e-04
+epoch 26/50 | iter  25300 | loss 0.0559 | lr 5.60e-04
+epoch 27/50 | iter  25400 | loss 0.0557 | lr 5.57e-04
+epoch 27/50 | iter  25500 | loss 0.0562 | lr 5.54e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 27/50 | iter  25600 | loss 0.0563 | lr 5.51e-04
+epoch 27/50 | iter  25700 | loss 0.0560 | lr 5.48e-04
+epoch 27/50 | iter  25800 | loss 0.0553 | lr 5.45e-04
+epoch 27/50 | iter  25900 | loss 0.0557 | lr 5.41e-04
+epoch 27/50 | iter  26000 | loss 0.0560 | lr 5.38e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+epoch 27/50 | iter  26100 | loss 0.0560 | lr 5.35e-04
+epoch 27/50 | iter  26200 | loss 0.0560 | lr 5.32e-04
+epoch 27/50 | iter  26300 | loss 0.0559 | lr 5.29e-04
+epoch 28/50 | iter  26400 | loss 0.0562 | lr 5.26e-04
+epoch 28/50 | iter  26500 | loss 0.0558 | lr 5.23e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 28/50 | iter  26600 | loss 0.0566 | lr 5.20e-04
+epoch 28/50 | iter  26700 | loss 0.0560 | lr 5.17e-04
+epoch 28/50 | iter  26800 | loss 0.0569 | lr 5.14e-04
+epoch 28/50 | iter  26900 | loss 0.0560 | lr 5.11e-04
+epoch 28/50 | iter  27000 | loss 0.0553 | lr 5.08e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+epoch 28/50 | iter  27100 | loss 0.0556 | lr 5.05e-04
+epoch 28/50 | iter  27200 | loss 0.0557 | lr 5.02e-04
+epoch 28/50 | iter  27300 | loss 0.0561 | lr 4.99e-04
+epoch 29/50 | iter  27400 | loss 0.0555 | lr 4.96e-04
+epoch 29/50 | iter  27500 | loss 0.0552 | lr 4.93e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+epoch 29/50 | iter  27600 | loss 0.0551 | lr 4.90e-04
+epoch 29/50 | iter  27700 | loss 0.0555 | lr 4.87e-04
+epoch 29/50 | iter  27800 | loss 0.0557 | lr 4.84e-04
+epoch 29/50 | iter  27900 | loss 0.0561 | lr 4.81e-04
+epoch 29/50 | iter  28000 | loss 0.0557 | lr 4.78e-04
+  [eval] val_loss: 0.0497 | val_cos_sim: 0.9503
+  [save] Best model saved (val_loss: 0.0497)
+epoch 29/50 | iter  28100 | loss 0.0554 | lr 4.75e-04
+epoch 29/50 | iter  28200 | loss 0.0565 | lr 4.72e-04
+epoch 29/50 | iter  28300 | loss 0.0556 | lr 4.69e-04
+epoch 30/50 | iter  28400 | loss 0.0557 | lr 4.66e-04
+epoch 30/50 | iter  28500 | loss 0.0560 | lr 4.63e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 30/50 | iter  28600 | loss 0.0558 | lr 4.60e-04
+epoch 30/50 | iter  28700 | loss 0.0563 | lr 4.57e-04
+epoch 30/50 | iter  28800 | loss 0.0554 | lr 4.54e-04
+epoch 30/50 | iter  28900 | loss 0.0564 | lr 4.51e-04
+epoch 30/50 | iter  29000 | loss 0.0551 | lr 4.48e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 30/50 | iter  29100 | loss 0.0549 | lr 4.45e-04
+epoch 30/50 | iter  29200 | loss 0.0557 | lr 4.42e-04
+epoch 31/50 | iter  29300 | loss 0.0556 | lr 4.39e-04
+epoch 31/50 | iter  29400 | loss 0.0552 | lr 4.36e-04
+epoch 31/50 | iter  29500 | loss 0.0553 | lr 4.33e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 31/50 | iter  29600 | loss 0.0558 | lr 4.30e-04
+epoch 31/50 | iter  29700 | loss 0.0557 | lr 4.27e-04
+epoch 31/50 | iter  29800 | loss 0.0557 | lr 4.24e-04
+epoch 31/50 | iter  29900 | loss 0.0556 | lr 4.21e-04
+epoch 31/50 | iter  30000 | loss 0.0553 | lr 4.18e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 31/50 | iter  30100 | loss 0.0562 | lr 4.15e-04
+epoch 31/50 | iter  30200 | loss 0.0558 | lr 4.13e-04
+epoch 32/50 | iter  30300 | loss 0.0555 | lr 4.10e-04
+epoch 32/50 | iter  30400 | loss 0.0557 | lr 4.07e-04
+epoch 32/50 | iter  30500 | loss 0.0559 | lr 4.04e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 32/50 | iter  30600 | loss 0.0556 | lr 4.01e-04
+epoch 32/50 | iter  30700 | loss 0.0555 | lr 3.98e-04
+epoch 32/50 | iter  30800 | loss 0.0554 | lr 3.95e-04
+epoch 32/50 | iter  30900 | loss 0.0562 | lr 3.92e-04
+epoch 32/50 | iter  31000 | loss 0.0553 | lr 3.90e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 32/50 | iter  31100 | loss 0.0556 | lr 3.87e-04
+epoch 32/50 | iter  31200 | loss 0.0556 | lr 3.84e-04
+epoch 33/50 | iter  31300 | loss 0.0553 | lr 3.81e-04
+epoch 33/50 | iter  31400 | loss 0.0558 | lr 3.78e-04
+epoch 33/50 | iter  31500 | loss 0.0559 | lr 3.75e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 33/50 | iter  31600 | loss 0.0560 | lr 3.73e-04
+epoch 33/50 | iter  31700 | loss 0.0563 | lr 3.70e-04
+epoch 33/50 | iter  31800 | loss 0.0556 | lr 3.67e-04
+epoch 33/50 | iter  31900 | loss 0.0557 | lr 3.64e-04
+epoch 33/50 | iter  32000 | loss 0.0560 | lr 3.61e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 33/50 | iter  32100 | loss 0.0555 | lr 3.59e-04
+epoch 33/50 | iter  32200 | loss 0.0551 | lr 3.56e-04
+epoch 34/50 | iter  32300 | loss 0.0564 | lr 3.53e-04
+epoch 34/50 | iter  32400 | loss 0.0549 | lr 3.50e-04
+epoch 34/50 | iter  32500 | loss 0.0551 | lr 3.48e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 34/50 | iter  32600 | loss 0.0554 | lr 3.45e-04
+epoch 34/50 | iter  32700 | loss 0.0557 | lr 3.42e-04
+epoch 34/50 | iter  32800 | loss 0.0555 | lr 3.40e-04
+epoch 34/50 | iter  32900 | loss 0.0558 | lr 3.37e-04
+epoch 34/50 | iter  33000 | loss 0.0554 | lr 3.34e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 34/50 | iter  33100 | loss 0.0558 | lr 3.32e-04
+epoch 35/50 | iter  33200 | loss 0.0562 | lr 3.29e-04
+epoch 35/50 | iter  33300 | loss 0.0556 | lr 3.26e-04
+epoch 35/50 | iter  33400 | loss 0.0554 | lr 3.24e-04
+epoch 35/50 | iter  33500 | loss 0.0558 | lr 3.21e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 35/50 | iter  33600 | loss 0.0552 | lr 3.18e-04
+epoch 35/50 | iter  33700 | loss 0.0550 | lr 3.16e-04
+epoch 35/50 | iter  33800 | loss 0.0556 | lr 3.13e-04
+epoch 35/50 | iter  33900 | loss 0.0549 | lr 3.11e-04
+epoch 35/50 | iter  34000 | loss 0.0555 | lr 3.08e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+epoch 35/50 | iter  34100 | loss 0.0554 | lr 3.05e-04
+epoch 36/50 | iter  34200 | loss 0.0556 | lr 3.03e-04
+epoch 36/50 | iter  34300 | loss 0.0555 | lr 3.00e-04
+epoch 36/50 | iter  34400 | loss 0.0555 | lr 2.98e-04
+epoch 36/50 | iter  34500 | loss 0.0561 | lr 2.95e-04
+  [eval] val_loss: 0.0496 | val_cos_sim: 0.9504
+  [save] Best model saved (val_loss: 0.0496)
+epoch 36/50 | iter  34600 | loss 0.0559 | lr 2.93e-04
+epoch 36/50 | iter  34700 | loss 0.0557 | lr 2.90e-04
+epoch 36/50 | iter  34800 | loss 0.0550 | lr 2.88e-04
+epoch 36/50 | iter  34900 | loss 0.0553 | lr 2.85e-04
+epoch 36/50 | iter  35000 | loss 0.0556 | lr 2.83e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 36/50 | iter  35100 | loss 0.0552 | lr 2.80e-04
+epoch 37/50 | iter  35200 | loss 0.0556 | lr 2.78e-04
+epoch 37/50 | iter  35300 | loss 0.0555 | lr 2.76e-04
+epoch 37/50 | iter  35400 | loss 0.0551 | lr 2.73e-04
+epoch 37/50 | iter  35500 | loss 0.0556 | lr 2.71e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 37/50 | iter  35600 | loss 0.0554 | lr 2.68e-04
+epoch 37/50 | iter  35700 | loss 0.0561 | lr 2.66e-04
+epoch 37/50 | iter  35800 | loss 0.0551 | lr 2.64e-04
+epoch 37/50 | iter  35900 | loss 0.0556 | lr 2.61e-04
+epoch 37/50 | iter  36000 | loss 0.0557 | lr 2.59e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 37/50 | iter  36100 | loss 0.0552 | lr 2.57e-04
+epoch 38/50 | iter  36200 | loss 0.0557 | lr 2.54e-04
+epoch 38/50 | iter  36300 | loss 0.0561 | lr 2.52e-04
+epoch 38/50 | iter  36400 | loss 0.0559 | lr 2.50e-04
+epoch 38/50 | iter  36500 | loss 0.0556 | lr 2.47e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 38/50 | iter  36600 | loss 0.0553 | lr 2.45e-04
+epoch 38/50 | iter  36700 | loss 0.0556 | lr 2.43e-04
+epoch 38/50 | iter  36800 | loss 0.0559 | lr 2.41e-04
+epoch 38/50 | iter  36900 | loss 0.0553 | lr 2.39e-04
+epoch 38/50 | iter  37000 | loss 0.0559 | lr 2.36e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 39/50 | iter  37100 | loss 0.0554 | lr 2.34e-04
+epoch 39/50 | iter  37200 | loss 0.0560 | lr 2.32e-04
+epoch 39/50 | iter  37300 | loss 0.0554 | lr 2.30e-04
+epoch 39/50 | iter  37400 | loss 0.0556 | lr 2.28e-04
+epoch 39/50 | iter  37500 | loss 0.0555 | lr 2.26e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 39/50 | iter  37600 | loss 0.0557 | lr 2.24e-04
+epoch 39/50 | iter  37700 | loss 0.0555 | lr 2.21e-04
+epoch 39/50 | iter  37800 | loss 0.0557 | lr 2.19e-04
+epoch 39/50 | iter  37900 | loss 0.0553 | lr 2.17e-04
+epoch 39/50 | iter  38000 | loss 0.0552 | lr 2.15e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 40/50 | iter  38100 | loss 0.0551 | lr 2.13e-04
+epoch 40/50 | iter  38200 | loss 0.0557 | lr 2.11e-04
+epoch 40/50 | iter  38300 | loss 0.0550 | lr 2.09e-04
+epoch 40/50 | iter  38400 | loss 0.0552 | lr 2.07e-04
+epoch 40/50 | iter  38500 | loss 0.0549 | lr 2.05e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 40/50 | iter  38600 | loss 0.0552 | lr 2.03e-04
+epoch 40/50 | iter  38700 | loss 0.0550 | lr 2.01e-04
+epoch 40/50 | iter  38800 | loss 0.0557 | lr 1.99e-04
+epoch 40/50 | iter  38900 | loss 0.0557 | lr 1.98e-04
+epoch 40/50 | iter  39000 | loss 0.0557 | lr 1.96e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 41/50 | iter  39100 | loss 0.0548 | lr 1.94e-04
+epoch 41/50 | iter  39200 | loss 0.0550 | lr 1.92e-04
+epoch 41/50 | iter  39300 | loss 0.0550 | lr 1.90e-04
+epoch 41/50 | iter  39400 | loss 0.0553 | lr 1.88e-04
+epoch 41/50 | iter  39500 | loss 0.0552 | lr 1.86e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 41/50 | iter  39600 | loss 0.0562 | lr 1.85e-04
+epoch 41/50 | iter  39700 | loss 0.0554 | lr 1.83e-04
+epoch 41/50 | iter  39800 | loss 0.0552 | lr 1.81e-04
+epoch 41/50 | iter  39900 | loss 0.0555 | lr 1.79e-04
+epoch 41/50 | iter  40000 | loss 0.0550 | lr 1.78e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 42/50 | iter  40100 | loss 0.0556 | lr 1.76e-04
+epoch 42/50 | iter  40200 | loss 0.0555 | lr 1.74e-04
+epoch 42/50 | iter  40300 | loss 0.0555 | lr 1.73e-04
+epoch 42/50 | iter  40400 | loss 0.0557 | lr 1.71e-04
+epoch 42/50 | iter  40500 | loss 0.0548 | lr 1.69e-04
+  [eval] val_loss: 0.0495 | val_cos_sim: 0.9505
+  [save] Best model saved (val_loss: 0.0495)
+epoch 42/50 | iter  40600 | loss 0.0550 | lr 1.68e-04
+epoch 42/50 | iter  40700 | loss 0.0552 | lr 1.66e-04
+epoch 42/50 | iter  40800 | loss 0.0550 | lr 1.65e-04
+epoch 42/50 | iter  40900 | loss 0.0557 | lr 1.63e-04
+epoch 43/50 | iter  41000 | loss 0.0553 | lr 1.61e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 43/50 | iter  41100 | loss 0.0554 | lr 1.60e-04
+epoch 43/50 | iter  41200 | loss 0.0558 | lr 1.58e-04
+epoch 43/50 | iter  41300 | loss 0.0552 | lr 1.57e-04
+epoch 43/50 | iter  41400 | loss 0.0557 | lr 1.55e-04
+epoch 43/50 | iter  41500 | loss 0.0555 | lr 1.54e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 43/50 | iter  41600 | loss 0.0555 | lr 1.53e-04
+epoch 43/50 | iter  41700 | loss 0.0556 | lr 1.51e-04
+epoch 43/50 | iter  41800 | loss 0.0552 | lr 1.50e-04
+epoch 43/50 | iter  41900 | loss 0.0555 | lr 1.48e-04
+epoch 44/50 | iter  42000 | loss 0.0551 | lr 1.47e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 44/50 | iter  42100 | loss 0.0549 | lr 1.46e-04
+epoch 44/50 | iter  42200 | loss 0.0547 | lr 1.44e-04
+epoch 44/50 | iter  42300 | loss 0.0555 | lr 1.43e-04
+epoch 44/50 | iter  42400 | loss 0.0551 | lr 1.42e-04
+epoch 44/50 | iter  42500 | loss 0.0549 | lr 1.40e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 44/50 | iter  42600 | loss 0.0553 | lr 1.39e-04
+epoch 44/50 | iter  42700 | loss 0.0548 | lr 1.38e-04
+epoch 44/50 | iter  42800 | loss 0.0552 | lr 1.37e-04
+epoch 44/50 | iter  42900 | loss 0.0550 | lr 1.35e-04
+epoch 45/50 | iter  43000 | loss 0.0557 | lr 1.34e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 45/50 | iter  43100 | loss 0.0553 | lr 1.33e-04
+epoch 45/50 | iter  43200 | loss 0.0554 | lr 1.32e-04
+epoch 45/50 | iter  43300 | loss 0.0546 | lr 1.31e-04
+epoch 45/50 | iter  43400 | loss 0.0549 | lr 1.30e-04
+epoch 45/50 | iter  43500 | loss 0.0550 | lr 1.29e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 45/50 | iter  43600 | loss 0.0555 | lr 1.28e-04
+epoch 45/50 | iter  43700 | loss 0.0555 | lr 1.27e-04
+epoch 45/50 | iter  43800 | loss 0.0554 | lr 1.26e-04
+epoch 45/50 | iter  43900 | loss 0.0555 | lr 1.25e-04
+epoch 46/50 | iter  44000 | loss 0.0548 | lr 1.24e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 46/50 | iter  44100 | loss 0.0552 | lr 1.23e-04
+epoch 46/50 | iter  44200 | loss 0.0550 | lr 1.22e-04
+epoch 46/50 | iter  44300 | loss 0.0553 | lr 1.21e-04
+epoch 46/50 | iter  44400 | loss 0.0555 | lr 1.20e-04
+epoch 46/50 | iter  44500 | loss 0.0554 | lr 1.19e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 46/50 | iter  44600 | loss 0.0549 | lr 1.18e-04
+epoch 46/50 | iter  44700 | loss 0.0555 | lr 1.17e-04
+epoch 46/50 | iter  44800 | loss 0.0554 | lr 1.16e-04
+epoch 47/50 | iter  44900 | loss 0.0549 | lr 1.16e-04
+epoch 47/50 | iter  45000 | loss 0.0553 | lr 1.15e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 47/50 | iter  45100 | loss 0.0550 | lr 1.14e-04
+epoch 47/50 | iter  45200 | loss 0.0555 | lr 1.13e-04
+epoch 47/50 | iter  45300 | loss 0.0551 | lr 1.13e-04
+epoch 47/50 | iter  45400 | loss 0.0550 | lr 1.12e-04
+epoch 47/50 | iter  45500 | loss 0.0550 | lr 1.11e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 47/50 | iter  45600 | loss 0.0551 | lr 1.11e-04
+epoch 47/50 | iter  45700 | loss 0.0552 | lr 1.10e-04
+epoch 47/50 | iter  45800 | loss 0.0546 | lr 1.09e-04
+epoch 48/50 | iter  45900 | loss 0.0551 | lr 1.09e-04
+epoch 48/50 | iter  46000 | loss 0.0552 | lr 1.08e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 48/50 | iter  46100 | loss 0.0555 | lr 1.08e-04
+epoch 48/50 | iter  46200 | loss 0.0554 | lr 1.07e-04
+epoch 48/50 | iter  46300 | loss 0.0550 | lr 1.06e-04
+epoch 48/50 | iter  46400 | loss 0.0553 | lr 1.06e-04
+epoch 48/50 | iter  46500 | loss 0.0551 | lr 1.05e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 48/50 | iter  46600 | loss 0.0551 | lr 1.05e-04
+epoch 48/50 | iter  46700 | loss 0.0549 | lr 1.05e-04
+epoch 48/50 | iter  46800 | loss 0.0549 | lr 1.04e-04
+epoch 49/50 | iter  46900 | loss 0.0548 | lr 1.04e-04
+epoch 49/50 | iter  47000 | loss 0.0542 | lr 1.03e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+epoch 49/50 | iter  47100 | loss 0.0549 | lr 1.03e-04
+epoch 49/50 | iter  47200 | loss 0.0550 | lr 1.03e-04
+epoch 49/50 | iter  47300 | loss 0.0553 | lr 1.02e-04
+epoch 49/50 | iter  47400 | loss 0.0554 | lr 1.02e-04
+epoch 49/50 | iter  47500 | loss 0.0553 | lr 1.02e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 49/50 | iter  47600 | loss 0.0547 | lr 1.01e-04
+epoch 49/50 | iter  47700 | loss 0.0552 | lr 1.01e-04
+epoch 49/50 | iter  47800 | loss 0.0547 | lr 1.01e-04
+epoch 50/50 | iter  47900 | loss 0.0553 | lr 1.01e-04
+epoch 50/50 | iter  48000 | loss 0.0552 | lr 1.01e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 50/50 | iter  48100 | loss 0.0546 | lr 1.01e-04
+epoch 50/50 | iter  48200 | loss 0.0547 | lr 1.00e-04
+epoch 50/50 | iter  48300 | loss 0.0553 | lr 1.00e-04
+epoch 50/50 | iter  48400 | loss 0.0553 | lr 1.00e-04
+epoch 50/50 | iter  48500 | loss 0.0553 | lr 1.00e-04
+  [eval] val_loss: 0.0494 | val_cos_sim: 0.9506
+  [save] Best model saved (val_loss: 0.0494)
+epoch 50/50 | iter  48600 | loss 0.0555 | lr 1.00e-04
+epoch 50/50 | iter  48700 | loss 0.0550 | lr 1.00e-04
+
+============================================================
+Final Evaluation
+============================================================
+  val_loss: 0.0494
+  val_cos_sim: 0.9506
+wandb: updating run metadata
+wandb: updating run metadata; uploading history steps 485-487, summary, console lines 666-675
+wandb: uploading output.log; uploading wandb-summary.json
+wandb: uploading data
+wandb: 
+wandb: Run history:
+wandb:              epoch ▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▃▃▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇██
+wandb: final/test_cos_sim ▁
+wandb:    final/test_loss ▁
+wandb:  final/val_cos_sim ▁
+wandb:     final/val_loss ▁
+wandb:         train/loss █▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           train/lr ▅██████▇▇▇▇▇▇▇▆▆▅▅▅▅▄▃▃▃▃▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁
+wandb:        val/cos_sim ▁▃▆▇▇▇██████████████████████████████████
+wandb:           val/loss █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:              epoch 49
+wandb: final/test_cos_sim 0.95052
+wandb:    final/test_loss 0.04948
+wandb:  final/val_cos_sim 0.95059
+wandb:     final/val_loss 0.04941
+wandb:         train/loss 0.05497
+wandb:           train/lr 0.0001
+wandb:        val/cos_sim 0.95059
+wandb:           val/loss 0.04941
+wandb: 
+wandb: 🚀 View run ar-shuffled at: https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v4/runs/y5wswnmj
+wandb: ⭐️ View project at: https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v4
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260223_114420-y5wswnmj/logs
+  test_loss: 0.0495
+  test_cos_sim: 0.9505
+
+Training complete.

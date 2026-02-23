@@ -12,7 +12,7 @@ import copy
 import argparse
 
 import torch
-import torch.nn.functional as F
+
 import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -38,7 +38,10 @@ def parse_args():
 
 
 @torch.no_grad()
-def update_ema(ema_model, model, decay=0.9999):
+def update_ema(ema_model, model, step, target_decay=0.9999):
+    # Adaptive decay: starts fast, converges to target_decay as step grows.
+    # Prevents EMA from lagging behind when total training steps are short.
+    decay = min(target_decay, (1 + step) / (10 + step))
     for p_ema, p in zip(ema_model.parameters(), model.parameters()):
         p_ema.mul_(decay).add_(p.data, alpha=1 - decay)
 
@@ -89,7 +92,7 @@ def main():
     # Compute total iterations for LR schedule
     iters_per_epoch = len(train_loader)
     max_iters = epochs * iters_per_epoch
-    warmup_iters = int(cfg.warmup_iters * iters_per_epoch) if cfg.warmup_iters < 1 else int(cfg.warmup_iters)
+    warmup_iters = int(cfg.warmup_iters * max_iters) if cfg.warmup_iters < 1 else int(cfg.warmup_iters)
     print(f"  {iters_per_epoch} iters/epoch × {epochs} epochs = {max_iters} total iters")
 
     # Create model
@@ -151,14 +154,14 @@ def main():
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
 
-            predictions, loss = model(vectors, mode='AR')
+            _, loss = model(vectors, mode='AR')
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             if cfg.grad_clip > 0:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
             optimizer.step()
-            update_ema(ema_model, model)
+            update_ema(ema_model, model, global_step)
 
             if global_step % cfg.log_interval == 0:
                 print(f"epoch {epoch+1}/{epochs} | iter {global_step:>6d} | loss {loss.item():.4f} | lr {lr:.2e}")

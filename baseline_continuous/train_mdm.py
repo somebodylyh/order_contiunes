@@ -41,7 +41,10 @@ def parse_args():
 
 
 @torch.no_grad()
-def update_ema(ema_model, model, decay=0.9999):
+def update_ema(ema_model, model, step, target_decay=0.9999):
+    # Adaptive decay: starts fast, converges to target_decay as step grows.
+    # Prevents EMA from lagging behind when total training steps are short.
+    decay = min(target_decay, (1 + step) / (10 + step))
     for p_ema, p in zip(ema_model.parameters(), model.parameters()):
         p_ema.mul_(decay).add_(p.data, alpha=1 - decay)
 
@@ -164,7 +167,7 @@ def main():
             if cfg.grad_clip > 0:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
             optimizer.step()
-            update_ema(ema_model, model)
+            update_ema(ema_model, model, global_step)
 
             if global_step % cfg.log_interval == 0:
                 print(f"epoch {epoch+1}/{epochs} | iter {global_step:>6d} | loss {loss.item():.4f} | lr {lr:.2e}")
