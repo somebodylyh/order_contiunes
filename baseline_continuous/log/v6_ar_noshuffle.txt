@@ -1,0 +1,92 @@
+============================================================
+ContinuousAOGPT — AR Training (no shuffle)
+============================================================
+
+Loading data from disk...
+[disk] train=50000, val=2000, test=2000
+  97 iters/epoch × 50 epochs = 4850 total iters
+
+Creating model...
+number of parameters: 4.05M
+num decayed parameter tensors: 26, with 4,043,264 parameters
+num non-decayed parameter tensors: 41, with 19,072 parameters
+using fused AdamW: True
+
+Starting training for 50 epochs...
+epoch 1/50 | iter      0 | loss 1.0015 | lr 0.00e+00
+epoch 2/50 | iter    100 | loss 0.2682 | lr 4.13e-04
+epoch 3/50 | iter    200 | loss 0.1445 | lr 8.26e-04
+epoch 4/50 | iter    300 | loss 0.1438 | lr 1.00e-03
+epoch 5/50 | iter    400 | loss 0.1431 | lr 9.97e-04
+epoch 6/50 | iter    500 | loss 0.1432 | lr 9.93e-04
+  [eval] val_loss: 0.1678 | val_cos_sim: 0.8322
+  [save] Best model saved (val_loss: 0.1678)
+epoch 7/50 | iter    600 | loss 0.1432 | lr 9.87e-04
+epoch 8/50 | iter    700 | loss 0.1429 | lr 9.78e-04
+epoch 9/50 | iter    800 | loss 0.1425 | lr 9.68e-04
+epoch 10/50 | iter    900 | loss 0.1418 | lr 9.55e-04
+epoch 11/50 | iter   1000 | loss 0.1409 | lr 9.41e-04
+  [eval] val_loss: 0.1669 | val_cos_sim: 0.8331
+  [save] Best model saved (val_loss: 0.1669)
+epoch 12/50 | iter   1100 | loss 0.1395 | lr 9.25e-04
+epoch 13/50 | iter   1200 | loss 0.1375 | lr 9.07e-04
+epoch 14/50 | iter   1300 | loss 0.1346 | lr 8.88e-04
+epoch 15/50 | iter   1400 | loss 0.1311 | lr 8.67e-04
+epoch 16/50 | iter   1500 | loss 0.1287 | lr 8.44e-04
+  [eval] val_loss: 0.1638 | val_cos_sim: 0.8362
+  [save] Best model saved (val_loss: 0.1638)
+epoch 17/50 | iter   1600 | loss 0.1263 | lr 8.21e-04
+epoch 18/50 | iter   1700 | loss 0.1239 | lr 7.95e-04
+epoch 19/50 | iter   1800 | loss 0.1216 | lr 7.69e-04
+epoch 20/50 | iter   1900 | loss 0.1196 | lr 7.42e-04
+epoch 21/50 | iter   2000 | loss 0.1181 | lr 7.14e-04
+  [eval] val_loss: 0.1627 | val_cos_sim: 0.8373
+  [save] Best model saved (val_loss: 0.1627)
+epoch 22/50 | iter   2100 | loss 0.1164 | lr 6.85e-04
+epoch 23/50 | iter   2200 | loss 0.1145 | lr 6.55e-04
+epoch 24/50 | iter   2300 | loss 0.1130 | lr 6.25e-04
+epoch 25/50 | iter   2400 | loss 0.1119 | lr 5.95e-04
+epoch 26/50 | iter   2500 | loss 0.1103 | lr 5.64e-04
+  [eval] val_loss: 0.1619 | val_cos_sim: 0.8381
+  [save] Best model saved (val_loss: 0.1619)
+epoch 27/50 | iter   2600 | loss 0.1093 | lr 5.33e-04
+epoch 28/50 | iter   2700 | loss 0.1081 | lr 5.03e-04
+epoch 29/50 | iter   2800 | loss 0.1073 | lr 4.72e-04
+epoch 30/50 | iter   2900 | loss 0.1060 | lr 4.42e-04
+epoch 31/50 | iter   3000 | loss 0.1048 | lr 4.13e-04
+  [eval] val_loss: 0.1612 | val_cos_sim: 0.8388
+  [save] Best model saved (val_loss: 0.1612)
+epoch 32/50 | iter   3100 | loss 0.1035 | lr 3.84e-04
+epoch 33/50 | iter   3200 | loss 0.1037 | lr 3.56e-04
+epoch 35/50 | iter   3300 | loss 0.0975 | lr 3.29e-04
+epoch 36/50 | iter   3400 | loss 0.0963 | lr 3.03e-04
+epoch 37/50 | iter   3500 | loss 0.0963 | lr 2.78e-04
+  [eval] val_loss: 0.1608 | val_cos_sim: 0.8392
+  [save] Best model saved (val_loss: 0.1608)
+epoch 38/50 | iter   3600 | loss 0.0953 | lr 2.54e-04
+epoch 39/50 | iter   3700 | loss 0.0945 | lr 2.31e-04
+epoch 40/50 | iter   3800 | loss 0.0946 | lr 2.10e-04
+epoch 41/50 | iter   3900 | loss 0.0940 | lr 1.91e-04
+epoch 42/50 | iter   4000 | loss 0.0941 | lr 1.73e-04
+  [eval] val_loss: 0.1606 | val_cos_sim: 0.8394
+  [save] Best model saved (val_loss: 0.1606)
+epoch 43/50 | iter   4100 | loss 0.0935 | lr 1.58e-04
+epoch 44/50 | iter   4200 | loss 0.0930 | lr 1.43e-04
+epoch 45/50 | iter   4300 | loss 0.0930 | lr 1.31e-04
+epoch 46/50 | iter   4400 | loss 0.0923 | lr 1.21e-04
+epoch 47/50 | iter   4500 | loss 0.0924 | lr 1.13e-04
+  [eval] val_loss: 0.1604 | val_cos_sim: 0.8396
+  [save] Best model saved (val_loss: 0.1604)
+epoch 48/50 | iter   4600 | loss 0.0920 | lr 1.07e-04
+epoch 49/50 | iter   4700 | loss 0.0919 | lr 1.02e-04
+epoch 50/50 | iter   4800 | loss 0.0916 | lr 1.00e-04
+
+============================================================
+Final Evaluation
+============================================================
+  val_loss: 0.1604
+  val_cos_sim: 0.8396
+  test_loss: 0.1600
+  test_cos_sim: 0.8400
+
+Training complete.

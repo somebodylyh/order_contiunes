@@ -1,6 +1,21 @@
 # Data and checkpoints (large files, not versioned)
 baseline_continuous/data/
 baseline_continuous/checkpoints/
+data/
+runs/
+linear/checkpoints/
+linear/checkpoints_continuous/
+linear/checkpoints_continuous_baseline/
+linear/linear_rotation_exp/
+causal_chain_exp/checkpoints/
+dag_exp/checkpoints/
+lossy_copy_exp/checkpoints/
+
+# Model weights
+*.pt
+*.pth
+*.ckpt
+*.bin
 
 # Python
 __pycache__/

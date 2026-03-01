@@ -62,16 +62,21 @@ class MemmapDataset(Dataset):
         vectors = torch.from_numpy(self.vectors[idx].copy())
         init_vectors = torch.from_numpy(self.init_vectors[idx].copy())
 
-        # Create shuffled version
-        shuffled_vectors, shuffle_indices = block_wise_shuffle(vectors, num_chunks=self.num_chunks)
+        # Main tokens: everything after the init prefix
+        num_init = init_vectors.shape[0]
+        main_vectors = vectors[num_init:]  # [seq_len - num_init, D]
+
+        # Shuffle only main tokens (init vectors are always the fixed prefix)
+        shuffled_main, shuffle_indices = block_wise_shuffle(main_vectors, num_chunks=self.num_chunks)
         order = torch.argsort(shuffle_indices)
 
         return {
             'vectors': vectors,
-            'shuffled_vectors': shuffled_vectors,
+            'init_vectors': init_vectors,
+            'main_vectors': main_vectors,
+            'shuffled_main': shuffled_main,
             'shuffle_indices': shuffle_indices,
             'order': order,
-            'init_vectors': init_vectors,
         }
 
 

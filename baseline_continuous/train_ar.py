@@ -105,6 +105,7 @@ def main():
         n_embd=cfg.n_embd,
         dropout=cfg.dropout,
         bias=cfg.bias,
+        num_init=cfg.num_init,
     )
     model = ContinuousAOGPT(model_config)
     model = model.to(device)
@@ -148,13 +149,14 @@ def main():
 
     for epoch in range(epochs):
         for batch in train_loader:
-            vectors = batch['vectors'].to(device) if no_shuffle else batch['shuffled_vectors'].to(device)
+            init_vectors = batch['init_vectors'].to(device)
+            vectors = batch['main_vectors'].to(device) if no_shuffle else batch['shuffled_main'].to(device)
 
             lr = get_lr(global_step, warmup_iters, max_iters, learning_rate)
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
 
-            _, loss = model(vectors, mode='AR')
+            _, loss = model(vectors, mode='AR', init_vectors=init_vectors)
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -171,12 +173,13 @@ def main():
 
             if global_step % cfg.eval_interval == 0 and global_step > 0:
                 eval_results = evaluate_ar(ema_model, val_loader, device)
-                print(f"  [eval] val_loss: {eval_results['val_loss']:.4f} | val_cos_sim: {eval_results['val_cos_sim']:.4f}")
+                print(f"  [eval] val_loss: {eval_results['val_loss']:.6f} | val_cos_sim: {eval_results['val_cos_sim']:.4f} | pred_norm: {eval_results['val_pred_norm']:.4f}")
                 if wandb_log:
                     import wandb
                     wandb.log({
                         'val/loss': eval_results['val_loss'],
                         'val/cos_sim': eval_results['val_cos_sim'],
+                        'val/pred_norm': eval_results['val_pred_norm'],
                     }, step=global_step)
 
                 if cfg.save_best_model and eval_results['val_loss'] < best_val_loss:
@@ -204,12 +207,14 @@ def main():
     print("Final Evaluation")
     print("=" * 60)
     final_results = evaluate_ar(ema_model, val_loader, device)
-    print(f"  val_loss: {final_results['val_loss']:.4f}")
+    print(f"  val_loss: {final_results['val_loss']:.6f}")
     print(f"  val_cos_sim: {final_results['val_cos_sim']:.4f}")
+    print(f"  val_pred_norm: {final_results['val_pred_norm']:.4f}")
 
     test_results = evaluate_ar(ema_model, test_loader, device)
-    print(f"  test_loss: {test_results['val_loss']:.4f}")
+    print(f"  test_loss: {test_results['val_loss']:.6f}")
     print(f"  test_cos_sim: {test_results['val_cos_sim']:.4f}")
+    print(f"  test_pred_norm: {test_results['val_pred_norm']:.4f}")
 
     if wandb_log:
         import wandb

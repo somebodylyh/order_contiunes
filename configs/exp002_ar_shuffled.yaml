@@ -1,0 +1,27 @@
+# AR Student + 块间打乱
+teacher:
+  model_name: "fla-hub/gla-340M-15B"
+  layer_idx: 3
+  seq_len: 32
+  n_train: 100000
+  n_test: 10000
+  extract_batch_size: 64
+  dataset_name: "wikitext-103"
+  cache_path: "data/teacher_cache"
+
+student:
+  type: ar_shuffled
+  d_model: 256
+  n_layers: 5        # teacher 使用 4 层，student 多一层
+  n_heads: 4
+  chunk_size: 4      # L=32 → 8 块，块内顺序保留，块间随机打乱
+
+training:
+  lr: 3.0e-4
+  epochs: 50
+  batch_size: 256
+  log_interval: 5
+  warmup_ratio: 0.05
+  ema_decay: 0.9999
+  grad_clip: 1.0
+  noise_scale: 0.30  # σ²=0.09 为 loss 下界（hidden std≈3.08，σ=10%·std）

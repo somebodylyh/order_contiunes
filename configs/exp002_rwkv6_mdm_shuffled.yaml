@@ -1,0 +1,23 @@
+# MDM Student + 打乱顺序 → baseline 比较对象（teacher 与 exp001 完全相同，共享缓存）
+teacher:
+  model_name: "fla-hub/gla-340M-15B"
+  layer_idx: 3          # 使用前 4 层
+  seq_len: 32
+  batch_size: 8
+  n_batches: 100
+  dataset_name: "wikitext"
+  cache_path: "data/teacher_cache"
+
+student:
+  type: mdm_shuffled
+  d_model: 256
+  n_layers: 4
+  n_heads: 4
+  mask_ratio: 0.15
+
+training:
+  lr: 3.0e-4
+  epochs: 100
+  batch_size: 64
+  log_interval: 5
+  val_ratio: 0.1

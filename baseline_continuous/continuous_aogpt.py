@@ -2,7 +2,7 @@
 Continuous Vector AOGPT Model
 
 Based on model_AOGPT_AdaLN6_NoRep_cond_128_trunc_qknorm.py,
-adapted for continuous vector input/output with Cosine loss.
+adapted for continuous vector input/output with MSE loss.
 """
 
 import math
@@ -132,6 +132,7 @@ class ContinuousAOGPTConfig:
     n_embd: int = 256
     dropout: float = 0.0
     bias: bool = True
+    num_init: int = 0          # number of init vectors used as fixed conditioning prefix
 
 
 class ContinuousAOGPT(nn.Module):
@@ -229,77 +230,107 @@ class ContinuousAOGPT(nn.Module):
         unshuffled_x[batch_indices, orders] = shuffled_x
         return unshuffled_x
 
-    def forward(self, vectors, mode='Random', orders=None, random_ratio=None):
+    def forward(self, vectors, mode='Random', orders=None, random_ratio=None, init_vectors=None):
         if mode is None:
             assert orders is not None, 'mode is None, orders must be provided'
-            return self.forward_fn(vectors, orders)
+            return self.forward_fn(vectors, orders, init_vectors)
         elif mode == 'AR':
             orders = self.set_ascending_orders(vectors)
-            return self.forward_fn(vectors, orders)
+            return self.forward_fn(vectors, orders, init_vectors)
         elif mode == 'Random':
             orders = self.sample_random_orders(vectors)
-            return self.forward_fn(vectors, orders)
+            return self.forward_fn(vectors, orders, init_vectors)
         elif mode == 'Random_CL':
             assert random_ratio is not None
             orders = self.sample_random_orders_CL(vectors, random_ratio)
-            return self.forward_fn(vectors, orders)
+            return self.forward_fn(vectors, orders, init_vectors)
         else:
             raise ValueError(f"Unknown mode: {mode}")
 
-    def forward_fn(self, vectors, orders):
+    def forward_fn(self, vectors, orders, init_vectors=None):
         """
-        vectors: [B, L, D] continuous vector sequence
-        orders:  [B, L] generation order
+        vectors:      [B, L, D]        main tokens to predict (excl. init prefix)
+        orders:       [B, L]           generation order for main tokens
+        init_vectors: [B, num_init, D] fixed conditioning prefix (always visible, not predicted)
+                                       If None, falls back to legacy [None]-token mode.
         """
         device = vectors.device
         b, t, d = vectors.size()
-        assert t <= self.config.block_size, f"Cannot forward sequence of length {t}, block size is only {self.config.block_size}"
 
-        pos = torch.arange(0, t + 1, dtype=torch.long, device=device)  # shape (t+1) for [None] token
+        if init_vectors is None:
+            # ── Legacy mode: prepend learnable [None] token, predict all L tokens ──
+            assert t <= self.config.block_size
+            pos = torch.arange(0, t + 1, dtype=torch.long, device=device)
+            vectors_shuffled = self.shuffle(vectors, orders)
+            targets = vectors_shuffled
+            tok_emb = self.input_proj(vectors_shuffled)
+            none_emb = self.none_token.expand(b, -1, -1)
+            tok_emb = torch.cat([none_emb, tok_emb], dim=1)
+            pos_emb = self.transformer.wpe(pos).unsqueeze(0).expand(b, -1, -1)
+            pos_emb_prefix = pos_emb[:, :1]
+            pos_emb_postfix = self.shuffle(pos_emb[:, 1:], orders)
+            target_pos_emb = self.transformer.wtpe(pos[:t]).unsqueeze(0).expand(b, -1, -1)
+            target_pos_emb_prefix = self.shuffle(target_pos_emb, orders)
+            target_pos_emb_postfix = torch.zeros_like(target_pos_emb[:, :1])
+            target_pos_emb_final = torch.cat([target_pos_emb_prefix, target_pos_emb_postfix], dim=1)
+            x = tok_emb + torch.cat([pos_emb_prefix, pos_emb_postfix], dim=1)
+            x = self.transformer.drop(x)
+            for block in self.transformer.h:
+                x = block(x, target_pos_emb_final)
+            x = self.transformer.final_layer(x, target_pos_emb_final)
+            predictions = self.output_proj(x)
+            shift_preds = predictions[:, :-1, :]
+            loss = F.mse_loss(shift_preds, targets)
+            return predictions, loss
 
-        # Shuffle input vectors by orders
-        vectors_shuffled = self.shuffle(vectors, orders)  # [B, L, D]
-        targets = vectors_shuffled  # prediction targets
+        # ── Init-prefix mode ──
+        # Sequence: [init_0,...,init_{ni-1}, main_shuf[0],...,main_shuf[t-1]]  (total = ni + t)
+        # Loss computed on the last t positions (main tokens only).
+        # init_vectors are always visible via causal attention; no loss on them.
+        ni = init_vectors.shape[1]                        # num_init
+        assert ni + t <= self.config.block_size + 1, \
+            f"ni+t={ni+t} exceeds block_size+1={self.config.block_size+1}"
 
-        # Input projection (replaces token embedding)
-        tok_emb = self.input_proj(vectors_shuffled)  # [B, L, n_embd]
+        # Shuffle main vectors
+        main_shuffled = self.shuffle(vectors, orders)     # [B, t, D]
+        targets = main_shuffled
 
-        # Prepend [None] start token
-        none_emb = self.none_token.expand(b, -1, -1)  # [B, 1, n_embd]
-        tok_emb = torch.cat([none_emb, tok_emb], dim=1)  # [B, L+1, n_embd]
+        # Input embeddings: [init_emb | main_emb_shuffled]
+        init_emb = self.input_proj(init_vectors)          # [B, ni, C]
+        main_emb = self.input_proj(main_shuffled)         # [B, t,  C]
+        tok_emb  = torch.cat([init_emb, main_emb], dim=1)  # [B, ni+t, C]
 
-        # Position embeddings (same shuffle logic as original)
-        pos_emb = self.transformer.wpe(pos)  # [L+1, n_embd]
-        pos_emb = pos_emb.unsqueeze(0).expand(b, -1, -1)  # [B, L+1, n_embd]
-        pos_emb_prefix = pos_emb[:, :1]  # [B, 1, n_embd] for [None] position
-        pos_emb_postfix = self.shuffle(pos_emb[:, 1:], orders)  # [B, L, n_embd] shuffled
+        # Position embeddings: init at positions 0..ni-1; main at original positions ni..ni+t-1
+        pos_init = torch.arange(ni, dtype=torch.long, device=device)
+        pos_main_all = torch.arange(ni, ni + t, dtype=torch.long, device=device)
+        init_pos_emb = self.transformer.wpe(pos_init).unsqueeze(0).expand(b, -1, -1)   # [B, ni, C]
+        main_pos_emb = self.transformer.wpe(pos_main_all).unsqueeze(0).expand(b, -1, -1)  # [B, t, C]
+        main_pos_emb_shuf = self.shuffle(main_pos_emb, orders)                          # [B, t, C]
+        x = tok_emb + torch.cat([init_pos_emb, main_pos_emb_shuf], dim=1)               # [B, ni+t, C]
 
-        # Target position embeddings (for AdaLN conditioning)
-        target_pos_emb = self.transformer.wtpe(pos[:t])  # [L, 128]
-        target_pos_emb = target_pos_emb.unsqueeze(0).expand(b, -1, -1)  # [B, L, 128]
-        target_pos_emb_prefix = self.shuffle(target_pos_emb, orders)  # [B, L, 128] shuffled
-        target_pos_emb_postfix = torch.zeros_like(target_pos_emb[:, :1])  # [B, 1, 128] zeros
-        target_pos_emb_final = torch.cat([target_pos_emb_prefix, target_pos_emb_postfix], dim=1)  # [B, L+1, 128]
+        # Target-position embeddings for AdaLN:
+        # At each sequence position p, tells the model "predict the main token at original pos X".
+        # For init positions 0..ni-2: zeros (not used in loss).
+        # For position ni-1 (last init): target = main_shuf[0] at orig pos orders[0]+ni.
+        # For position ni+i (main_shuf[i], i<t-1): target = main_shuf[i+1].
+        # For position ni+t-1 (last main): zeros.
+        main_orig_pos = orders + ni                        # [B, t], orig positions of main tokens
+        tpe_main = self.transformer.wtpe(main_orig_pos)   # [B, t, 128]
+        zeros_early = torch.zeros(b, ni - 1, 128, device=device)   # [B, ni-1, 128]
+        zeros_last  = torch.zeros(b, 1,      128, device=device)   # [B, 1,    128]
+        # layout: [zeros(ni-1) | tpe_main(t) | zeros(1)] = ni+t total
+        target_pos_emb_final = torch.cat([zeros_early, tpe_main, zeros_last], dim=1)  # [B, ni+t, 128]
 
-        x = tok_emb + torch.cat([pos_emb_prefix, pos_emb_postfix], dim=1)
-
-        # Forward through transformer
+        # Transformer forward
         x = self.transformer.drop(x)
         for block in self.transformer.h:
             x = block(x, target_pos_emb_final)
         x = self.transformer.final_layer(x, target_pos_emb_final)
+        predictions = self.output_proj(x)                 # [B, ni+t, D]
 
-        # Output projection (replaces lm_head)
-        predictions = self.output_proj(x)  # [B, L+1, D]
-
-        # Cosine loss (shift: predictions[:,:-1] predicts targets)
-        # Normalize pred before cosine: fixes gradient scaling (∝1/||pred||) and
-        # eliminates magnitude as a free variable, without risking zero-vector collapse.
-        # eps=1e-6 (not 1e-8) leaves enough margin away from the dead zone.
-        shift_preds = predictions[:, :-1, :]  # [B, L, D]
-        shift_preds_norm = F.normalize(shift_preds, dim=-1, eps=1e-6)
-        cos_sim = F.cosine_similarity(shift_preds_norm, targets, dim=-1)
-        loss = (1.0 - cos_sim).mean()
+        # Loss: prediction at positions [ni-1 .. ni+t-2] predicts main_shuf[0..t-1]
+        loss_preds = predictions[:, ni - 1 : ni - 1 + t, :]   # [B, t, D]
+        loss = F.mse_loss(loss_preds, targets)
 
         return predictions, loss
 

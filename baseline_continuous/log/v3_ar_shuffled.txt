@@ -1,0 +1,118 @@
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/admin/.netrc.
+wandb: Currently logged in as: 1113488238 (1113488238-dalian-university-of-technology) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run hbsn7fcb
+wandb: Tracking run with wandb version 0.24.0
+wandb: Run data is saved locally in /home/admin/lyuyuhuan/AO-GPT-MDM/wandb/run-20260218_125855-hbsn7fcb
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ar-shuffled
+wandb: ⭐️ View project at https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v3
+wandb: 🚀 View run at https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v3/runs/hbsn7fcb
+============================================================
+ContinuousAOGPT — AR Training (shuffled)
+============================================================
+
+Loading data from disk...
+[disk] train=100000, val=10000, test=10000
+  195 iters/epoch × 20 epochs = 3900 total iters
+
+Creating model...
+number of parameters: 4.16M
+num decayed parameter tensors: 26, with 4,178,432 parameters
+num non-decayed parameter tensors: 41, with 19,456 parameters
+using fused AdamW: True
+
+Starting training for 20 epochs...
+epoch 1/20 | iter      0 | loss 0.9980 | lr 0.00e+00
+epoch 1/20 | iter    100 | loss 0.4003 | lr 5.13e-04
+epoch 2/20 | iter    200 | loss 0.2677 | lr 1.00e-03
+epoch 2/20 | iter    300 | loss 0.2442 | lr 9.98e-04
+epoch 3/20 | iter    400 | loss 0.2350 | lr 9.93e-04
+epoch 3/20 | iter    500 | loss 0.2299 | lr 9.85e-04
+  [eval] val_loss: 0.2513 | val_cos_sim: 0.7487
+  [save] Best model saved (val_loss: 0.2513)
+epoch 4/20 | iter    600 | loss 0.2263 | lr 9.74e-04
+epoch 4/20 | iter    700 | loss 0.2243 | lr 9.59e-04
+epoch 5/20 | iter    800 | loss 0.2231 | lr 9.42e-04
+epoch 5/20 | iter    900 | loss 0.2215 | lr 9.22e-04
+epoch 6/20 | iter   1000 | loss 0.2193 | lr 8.99e-04
+  [eval] val_loss: 0.2351 | val_cos_sim: 0.7649
+  [save] Best model saved (val_loss: 0.2351)
+epoch 6/20 | iter   1100 | loss 0.2174 | lr 8.74e-04
+epoch 7/20 | iter   1200 | loss 0.2177 | lr 8.46e-04
+epoch 7/20 | iter   1300 | loss 0.2161 | lr 8.17e-04
+epoch 8/20 | iter   1400 | loss 0.2161 | lr 7.85e-04
+epoch 8/20 | iter   1500 | loss 0.2151 | lr 7.51e-04
+  [eval] val_loss: 0.2283 | val_cos_sim: 0.7717
+  [save] Best model saved (val_loss: 0.2283)
+epoch 9/20 | iter   1600 | loss 0.2136 | lr 7.17e-04
+epoch 9/20 | iter   1700 | loss 0.2144 | lr 6.81e-04
+epoch 10/20 | iter   1800 | loss 0.2138 | lr 6.44e-04
+epoch 10/20 | iter   1900 | loss 0.2128 | lr 6.06e-04
+epoch 11/20 | iter   2000 | loss 0.2131 | lr 5.68e-04
+  [eval] val_loss: 0.2256 | val_cos_sim: 0.7744
+  [save] Best model saved (val_loss: 0.2256)
+epoch 11/20 | iter   2100 | loss 0.2115 | lr 5.30e-04
+epoch 12/20 | iter   2200 | loss 0.2112 | lr 4.92e-04
+epoch 12/20 | iter   2300 | loss 0.2114 | lr 4.54e-04
+epoch 13/20 | iter   2400 | loss 0.2108 | lr 4.17e-04
+epoch 13/20 | iter   2500 | loss 0.2093 | lr 3.82e-04
+  [eval] val_loss: 0.2243 | val_cos_sim: 0.7757
+  [save] Best model saved (val_loss: 0.2243)
+epoch 14/20 | iter   2600 | loss 0.2101 | lr 3.47e-04
+epoch 14/20 | iter   2700 | loss 0.2100 | lr 3.14e-04
+epoch 15/20 | iter   2800 | loss 0.2098 | lr 2.82e-04
+epoch 15/20 | iter   2900 | loss 0.2097 | lr 2.52e-04
+epoch 16/20 | iter   3000 | loss 0.2097 | lr 2.25e-04
+  [eval] val_loss: 0.2235 | val_cos_sim: 0.7765
+  [save] Best model saved (val_loss: 0.2235)
+epoch 16/20 | iter   3100 | loss 0.2090 | lr 2.00e-04
+epoch 17/20 | iter   3200 | loss 0.2084 | lr 1.77e-04
+epoch 17/20 | iter   3300 | loss 0.2079 | lr 1.57e-04
+epoch 18/20 | iter   3400 | loss 0.2085 | lr 1.40e-04
+epoch 18/20 | iter   3500 | loss 0.2073 | lr 1.26e-04
+  [eval] val_loss: 0.2229 | val_cos_sim: 0.7771
+  [save] Best model saved (val_loss: 0.2229)
+epoch 19/20 | iter   3600 | loss 0.2077 | lr 1.14e-04
+epoch 19/20 | iter   3700 | loss 0.2080 | lr 1.06e-04
+epoch 20/20 | iter   3800 | loss 0.2080 | lr 1.02e-04
+
+============================================================
+Final Evaluation
+============================================================
+  val_loss: 0.2226
+  val_cos_sim: 0.7774
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading config.yaml
+wandb: 
+wandb: Run history:
+wandb:              epoch ▁▁▁▁▂▂▂▂▂▂▃▃▃▃▄▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▇▇▇▇▇▇███
+wandb: final/test_cos_sim ▁
+wandb:    final/test_loss ▁
+wandb:  final/val_cos_sim ▁
+wandb:     final/val_loss ▁
+wandb:         train/loss █▃▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           train/lr ▁▅███████▇▇▇▇▇▆▆▆▆▆▅▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂
+wandb:        val/cos_sim ▁▅▇▇███
+wandb:           val/loss █▄▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:              epoch 19
+wandb: final/test_cos_sim 0.77732
+wandb:    final/test_loss 0.22268
+wandb:  final/val_cos_sim 0.77743
+wandb:     final/val_loss 0.22257
+wandb:         train/loss 0.20796
+wandb:           train/lr 0.0001
+wandb:        val/cos_sim 0.77709
+wandb:           val/loss 0.22291
+wandb: 
+wandb: 🚀 View run ar-shuffled at: https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v3/runs/hbsn7fcb
+wandb: ⭐️ View project at: https://wandb.ai/1113488238-dalian-university-of-technology/order-continuous-v3
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260218_125855-hbsn7fcb/logs
+  test_loss: 0.2227
+  test_cos_sim: 0.7773
+
+Training complete.
