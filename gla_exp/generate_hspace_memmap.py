@@ -53,7 +53,9 @@ def main():
     parser.add_argument("--batch_size", type=int,   default=64)
     args = parser.parse_args()
 
+    args.data_dir = os.path.abspath(args.data_dir)
     os.makedirs(args.data_dir, exist_ok=True)
+    print(f"[config] output dir: {args.data_dir}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     cfg = TeacherConfig(model_name=args.model_name, layer_idx=args.layer_idx)
@@ -78,6 +80,7 @@ def main():
         init_mmap = np.memmap(init_path, dtype="float32", mode="w+", shape=(n, 1, D))
         fill_split(teacher, n, L, sig, args.batch_size, device,
                    vec_mmap, init_mmap, split)
+        del vec_mmap, init_mmap   # release file handles; avoids accumulating all splits in memory
         print(f"[{split}] saved → {vec_path}")
 
     # 保存 data_config.pt（disk_dataset.py 需要）
