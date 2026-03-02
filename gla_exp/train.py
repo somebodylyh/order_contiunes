@@ -2,8 +2,8 @@
 train.py — 统一训练入口，GLA Teacher-Student 实验框架。
 
 Usage:
-    python train.py --config configs/exp001_ar_noshuffle.yaml
-    python train.py --config configs/exp001_ar_noshuffle.yaml --force_regen
+    python gla_exp/train.py --config gla_exp/configs/exp001_ar_noshuffle.yaml
+    python gla_exp/train.py --config gla_exp/configs/exp001_ar_noshuffle.yaml --force_regen
 
 三个 baseline:
   exp001 ar_noshuffle → AR student + 原始顺序 → 上帝模型（无噪声下界）
@@ -22,11 +22,11 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import wandb
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # project root
 
-from baseline_continuous.exp_config import load_config
-from baseline_continuous.generate_data import get_cache_dir, cache_exists, generate_and_cache
-from baseline_continuous.exp_dataset import create_dataloaders, HiddenStateDataset
+from gla_exp.exp_config import load_config
+from gla_exp.generate_data import get_cache_dir, cache_exists, generate_and_cache
+from gla_exp.exp_dataset import create_dataloaders, HiddenStateDataset
 from baseline_continuous.continuous_aogpt import ContinuousAOGPT, ContinuousAOGPTConfig
 
 

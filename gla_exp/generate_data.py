@@ -9,16 +9,16 @@ generate_data.py — 用 FLATeacher 提取 wikitext hidden states，缓存到磁
 三个实验 teacher config 完全相同 → 同一 cache key → 共享缓存，无需重复生成。
 
 Usage:
-  python -m baseline_continuous.generate_data --config configs/exp001_ar_noshuffle.yaml
-  python -m baseline_continuous.generate_data --config configs/exp001_ar_noshuffle.yaml --force
+  python -m gla_exp.generate_data --config gla_exp/configs/exp001_ar_noshuffle.yaml
+  python -m gla_exp.generate_data --config gla_exp/configs/exp001_ar_noshuffle.yaml --force
 """
 import sys, os, json, argparse, math
 import torch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # project root
 
-from baseline_continuous.exp_config import load_config, teacher_cache_key, TeacherConfig
-from baseline_continuous.teachers import FLATeacher
+from gla_exp.exp_config import load_config, teacher_cache_key, TeacherConfig
+from gla_exp.teachers import FLATeacher
 
 
 def get_cache_dir(cfg: TeacherConfig) -> str:
