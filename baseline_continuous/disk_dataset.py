@@ -11,8 +11,6 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from typing import Dict, Tuple, Optional
 
-from linear.continuous_data_generator import ContinuousDenseARGenerator
-
 
 def block_wise_shuffle(vectors: torch.Tensor, num_chunks: int = 4):
     """Block-wise shuffle: shuffle chunk order, preserve internal order."""
