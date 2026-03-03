@@ -114,7 +114,7 @@ class ContinuousHSpaceTeacher(nn.Module):
         n_keep = cfg.layer_idx + 1
         model.model.layers = nn.ModuleList(list(model.model.layers)[:n_keep])
         print(f"[ContinuousHSpaceTeacher] Truncated to {n_keep} layers "
-              f"(d_model={model.config.hidden_size})")
+              f"(layer_idx={cfg.layer_idx}, d_model={model.config.hidden_size})")
 
         model.eval()
         for p in model.parameters():
@@ -154,15 +154,7 @@ class ContinuousHSpaceTeacher(nn.Module):
             )  # [B, t, D]
 
             self._hidden_buf = None
-            try:
-                self.model(inputs_embeds=x_hist)
-            except TypeError:
-                # 替换方案：直接调用底层各层
-                hidden = x_hist
-                for layer in self.model.model.layers:
-                    out = layer(hidden)
-                    hidden = out[0] if isinstance(out, tuple) else out
-                self._hidden_buf = hidden.detach()
+            self.model(inputs_embeds=x_hist)
 
             assert self._hidden_buf is not None, "Hook 未触发"
             mu_t = self._hidden_buf[:, -1, :]  # [B, D]

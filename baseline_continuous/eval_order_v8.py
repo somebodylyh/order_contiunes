@@ -119,7 +119,7 @@ def main():
     # Load data
     print("Loading data...")
     _, val_loader, test_loader = create_disk_dataloaders(
-        data_dir=os.path.join(os.path.dirname(__file__), 'data'),
+        data_dir=os.path.join(os.path.dirname(__file__), 'data_hspace_500k'),
         batch_size=64,
         num_workers=0,
         num_chunks=cfg.num_chunks,
@@ -132,7 +132,8 @@ def main():
         ('AR no-shuffle',os.path.join(ckpt_dir, 'best_ar_noshuffle_model.pt'),  False),
     ]
 
-    causal_order_ref = np.arange(cfg.num_chunks)   # 0,1,...,27 is the causal order
+    n_main = cfg.seq_length - cfg.num_init         # 31 main tokens
+    causal_order_ref = np.arange(n_main)           # 0,1,...,30 is the causal order
 
     for name, path, do_greedy in models_to_eval:
         if not os.path.exists(path):
@@ -145,7 +146,8 @@ def main():
         model = load_model(path, device)
 
         for split_name, loader in [('val', val_loader), ('test', test_loader)]:
-            causal_losses, rand_losses, greedy_taus = [], [], []
+            causal_losses, rand_losses, greedy_taus, greedy_losses = [], [], [], []
+            reverse_losses, true_reverse_losses = [], []
             N_MC = 10     # random MC samples
             N_BATCHES = 10  # enough for stable estimates
 
@@ -161,38 +163,66 @@ def main():
                 cl = eval_with_order(model, main_v, init_v, causal_orders)
                 causal_losses.append(cl)
 
+                # 1b. Naive reverse order loss (h_0 as init, predicts h_31 first — asymmetric)
+                reverse_orders = torch.arange(t - 1, -1, -1, device=device).unsqueeze(0).expand(B, -1)
+                rl = eval_with_order(model, main_v, init_v, reverse_orders)
+                reverse_losses.append(rl)
+
+                # 1c. True reverse: init=h_T, main=[h_{T-1},...,h_0], causal orders
+                #   Construct from existing batch on-the-fly:
+                #   full_prefix = [h_0, h_1, ..., h_{T-1}]  (init + main[:-1])
+                #   rev_init    = main_v[:, -1:, :]           = h_T
+                #   rev_main    = flip([h_0,...,h_{T-1}])     = [h_{T-1},...,h_0]
+                rev_init = main_v[:, -1:, :]
+                full_prefix = torch.cat([init_v, main_v[:, :-1, :]], dim=1)  # [B, t, D]
+                rev_main = full_prefix.flip(1)
+                causal_orders = torch.arange(t, device=device).unsqueeze(0).expand(B, -1)
+                trl = eval_with_order(model, rev_main, rev_init, causal_orders)
+                true_reverse_losses.append(trl)
+
                 # 2. Random order loss (MC)
                 mc = [eval_with_order(model, main_v, init_v,
                                       model.sample_random_orders(main_v))
                       for _ in range(N_MC)]
                 rand_losses.append(sum(mc) / N_MC)
 
-                # 3. Greedy order search + Kendall's τ  (MDM only, first 2 batches)
+                # 3. Greedy order search + Kendall's τ + greedy loss  (MDM only, first 2 batches)
                 if do_greedy and i < 2:
                     greedy_ords = greedy_order_search(model, main_v, init_v)  # [B, t]
+                    # 3a. Kendall's τ vs causal order
                     for b in range(B):
                         go = greedy_ords[b].cpu().numpy()
                         tau = kendall_tau(go, causal_order_ref)
                         greedy_taus.append(tau)
+                    # 3b. Loss when evaluating WITH the greedy order
+                    gl = eval_with_order(model, main_v, init_v, greedy_ords)
+                    greedy_losses.append(gl)
 
-            causal_mean = sum(causal_losses) / len(causal_losses)
-            rand_mean   = sum(rand_losses)   / len(rand_losses)
-            advantage   = rand_mean - causal_mean
+            causal_mean       = sum(causal_losses)       / len(causal_losses)
+            reverse_mean      = sum(reverse_losses)      / len(reverse_losses)
+            true_rev_mean     = sum(true_reverse_losses) / len(true_reverse_losses)
+            rand_mean         = sum(rand_losses)         / len(rand_losses)
+            advantage         = rand_mean - causal_mean
 
             print(f"\n  [{split_name}]")
-            print(f"    causal order loss : {causal_mean:.4f}")
-            print(f"    random order loss : {rand_mean:.4f}  (MC n={N_MC})")
-            print(f"    causal advantage  : {advantage:+.4f}  "
+            print(f"    causal  order loss       : {causal_mean:.4f}  (h_0→h_31, forward AR)")
+            print(f"    naive reverse loss       : {reverse_mean:.4f}  (h_0 init, predict h_31 first)")
+            print(f"    true  reverse loss       : {true_rev_mean:.4f}  (h_T init, predict h_{{T-1}} first)")
+            print(f"    random  order loss       : {rand_mean:.4f}  (MC n={N_MC})")
+            print(f"    causal advantage         : {advantage:+.4f}  "
                   f"({'causal better ✓' if advantage > 0 else 'no advantage ✗'})")
 
             if do_greedy and greedy_taus:
                 tau_mean = sum(greedy_taus) / len(greedy_taus)
                 tau_std  = (sum((x - tau_mean)**2 for x in greedy_taus) / len(greedy_taus))**0.5
                 n_samples = len(greedy_taus)
+                greedy_loss_mean = sum(greedy_losses) / len(greedy_losses)
                 print(f"    greedy Kendall τ  : {tau_mean:.4f} ± {tau_std:.4f}  "
                       f"(n={n_samples} samples)")
                 print(f"    τ interpretation  : "
-                      f"{'learned order ✓' if tau_mean > 0.3 else 'weak/no order signal ✗'}")
+                      f"{'learned order ✓' if tau_mean > 0.3 else ('reverse order ✗' if tau_mean < -0.3 else 'weak/no order signal ✗')}")
+                print(f"    greedy order loss : {greedy_loss_mean:.4f}  "
+                      f"(vs causal {causal_mean:.4f}, random {rand_mean:.4f})")
 
 
 if __name__ == '__main__':

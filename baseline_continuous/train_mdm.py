@@ -23,7 +23,7 @@ from baseline_continuous.continuous_aogpt import ContinuousAOGPT, ContinuousAOGP
 from baseline_continuous.eval_utils import (
     evaluate_ar, evaluate_per_step_loss, evaluate_rollout, evaluate_order_quality
 )
-from baseline_continuous.disk_dataset import create_disk_dataloaders
+from baseline_continuous.disk_dataset import create_disk_dataloaders, block_wise_shuffle
 
 
 def parse_args():
@@ -35,8 +35,9 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=None)
     parser.add_argument('--device', type=str, default=None)
     parser.add_argument('--data_dir', type=str, default=os.path.join(os.path.dirname(__file__), 'data'))
-    parser.add_argument('--mode', type=str, default='Random', choices=['Random', 'Random_CL'],
-                        help='Training mode: Random or Random_CL (curriculum learning)')
+    parser.add_argument('--mode', type=str, default='Random',
+                        choices=['Random', 'Random_CL', 'Block_Shuffle'],
+                        help='Training mode: Random (full random), Block_Shuffle (block-constrained random), or Random_CL (curriculum)')
     parser.add_argument('--random_ratio', type=float, default=0.5,
                         help='Ratio of random orders in Random_CL mode')
     return parser.parse_args()

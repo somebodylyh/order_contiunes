@@ -2,7 +2,7 @@
 vector_dim = 1024
 seq_length = 32
 num_init   = 1           # h_0 作为始终可见的 init prefix，不参与 loss
-num_chunks = 31          # = seq_length - num_init，MDM token-level shuffle
+num_chunks = 4           # block-wise shuffle：4块 × ~8 token，块内保留因果顺序
 sigma      = 0.3         # Teacher 生成时的噪声，理论下界 = sigma^2 = 0.09
 
 # 以下字段保留占位（train 脚本通过 cfg.xxx 引用，用于 wandb logging）
@@ -19,12 +19,12 @@ test_samples      = 10000
 # === Model ===
 n_layer    = 5
 n_head     = 4
-n_embd     = 256
+n_embd     = 1024
 block_size = 32
 dropout    = 0.0
 bias       = True
 
-# === Training ===
+# === Training ===1
 batch_size    = 256
 learning_rate = 3e-4
 epochs        = 50

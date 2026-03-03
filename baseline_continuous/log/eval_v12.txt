@@ -1,0 +1,68 @@
+Loading data...
+[disk] train=500000, val=10000, test=10000
+
+============================================================
+Model: MDM
+============================================================
+number of parameters: 69.31M
+  Loaded best_mdm_Random_model.pt  val_loss=0.2735
+
+  [val]
+    causal  order loss : 0.2711
+    reverse order loss : 0.2153
+    random  order loss : 0.2638  (MC n=10)
+    causal advantage   : -0.0073  (no advantage ✗)
+    greedy Kendall τ  : -0.2713 ± 0.2197  (n=128 samples)
+    τ interpretation  : weak/no order signal ✗
+    greedy order loss : 0.2300  (vs causal 0.2711, random 0.2638)
+
+  [test]
+    causal  order loss : 0.2704
+    reverse order loss : 0.2161
+    random  order loss : 0.2633  (MC n=10)
+    causal advantage   : -0.0071  (no advantage ✗)
+    greedy Kendall τ  : -0.2929 ± 0.2451  (n=128 samples)
+    τ interpretation  : weak/no order signal ✗
+    greedy order loss : 0.2281  (vs causal 0.2704, random 0.2633)
+
+============================================================
+Model: AR shuffled
+============================================================
+number of parameters: 69.31M
+  Loaded best_ar_model.pt  val_loss=0.1716
+
+  [val]
+    causal  order loss : 0.1704
+    reverse order loss : 0.3680
+    random  order loss : 0.3583  (MC n=10)
+    causal advantage   : +0.1878  (causal better ✓)
+    greedy Kendall τ  : -0.3562 ± 0.2885  (n=128 samples)
+    τ interpretation  : reverse order ✗
+    greedy order loss : 0.2367  (vs causal 0.1704, random 0.3583)
+
+  [test]
+    causal  order loss : 0.1694
+    reverse order loss : 0.3681
+    random  order loss : 0.3574  (MC n=10)
+    causal advantage   : +0.1880  (causal better ✓)
+    greedy Kendall τ  : -0.3410 ± 0.2833  (n=128 samples)
+    τ interpretation  : reverse order ✗
+    greedy order loss : 0.2369  (vs causal 0.1694, random 0.3574)
+
+============================================================
+Model: AR no-shuffle
+============================================================
+number of parameters: 69.31M
+  Loaded best_ar_noshuffle_model.pt  val_loss=0.1139
+
+  [val]
+    causal  order loss : 0.1132
+    reverse order loss : 0.3387
+    random  order loss : 0.4415  (MC n=10)
+    causal advantage   : +0.3283  (causal better ✓)
+
+  [test]
+    causal  order loss : 0.1131
+    reverse order loss : 0.3384
+    random  order loss : 0.4416  (MC n=10)
+    causal advantage   : +0.3285  (causal better ✓)
