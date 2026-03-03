@@ -19,7 +19,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from baseline_continuous import config as cfg
 from baseline_continuous.continuous_aogpt import ContinuousAOGPT, ContinuousAOGPTConfig
-from baseline_continuous.eval_utils import evaluate_ar
+from baseline_continuous.eval_utils import (
+    evaluate_ar, evaluate_per_step_loss, evaluate_rollout, evaluate_order_quality
+)
 from baseline_continuous.disk_dataset import create_disk_dataloaders
 
 
@@ -224,6 +226,57 @@ def main():
             'final/test_loss': test_results['val_loss'],
             'final/test_cos_sim': test_results['val_cos_sim'],
         })
+
+    # ── Extended final evaluation ──────────────────────────────────────────
+    print("\nRunning extended final evaluation...")
+    t_steps = list(range(cfg.num_chunks))
+
+    ps_loss = evaluate_per_step_loss(ema_model, test_loader, device)
+    print(f"  per-step causal loss  first3={ps_loss[:3].round(4)}  last3={ps_loss[-3:].round(4)}")
+
+    rollout_cos = evaluate_rollout(ema_model, test_loader, device)
+    print(f"  rollout cos_sim       first3={rollout_cos[:3].round(4)}  last3={rollout_cos[-3:].round(4)}")
+
+    if not no_shuffle:   # greedy order quality only for shuffled AR
+        oq = evaluate_order_quality(ema_model, test_loader, device)
+        print(f"  greedy Kendall tau    = {oq['mean_tau']:.4f}")
+        print(f"  per-pos correct rate  mean={oq['pos_correct'].mean():.3f}")
+
+    if wandb_log:
+        import wandb
+        log_dict = {
+            'final/per_step_loss':   wandb.plot.line_series(
+                xs=t_steps,
+                ys=[ps_loss.tolist()],
+                keys=['causal_loss'],
+                title='Per-step Causal Loss',
+                xname='step',
+            ),
+            'final/rollout_cos_sim': wandb.plot.line_series(
+                xs=t_steps,
+                ys=[rollout_cos.tolist()],
+                keys=['cos_sim'],
+                title='Rollout Cos Sim',
+                xname='step',
+            ),
+        }
+        if not no_shuffle:
+            log_dict['final/greedy_tau'] = oq['mean_tau']
+            log_dict['final/greedy_step_mse'] = wandb.plot.line_series(
+                xs=t_steps,
+                ys=[oq['step_mse'].tolist()],
+                keys=['step_mse'],
+                title='Greedy Step MSE',
+                xname='step',
+            )
+            log_dict['final/pos_correct_rate'] = wandb.plot.line_series(
+                xs=t_steps,
+                ys=[oq['pos_correct'].tolist()],
+                keys=['correct_rate'],
+                title='Per-position Correct Rate',
+                xname='position',
+            )
+        wandb.log(log_dict)
         wandb.finish()
 
     print("\nTraining complete.")
