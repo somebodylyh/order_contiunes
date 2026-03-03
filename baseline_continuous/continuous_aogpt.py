@@ -309,10 +309,10 @@ class ContinuousAOGPT(nn.Module):
         x = tok_emb + torch.cat([init_pos_emb, main_pos_emb_shuf], dim=1)               # [B, ni+t, C]
 
         # Target-position embeddings for AdaLN:
-        # At each sequence position p, tells the model "predict the main token at original pos X".
+        # Tells the model which generation step it is predicting (0-indexed).
         # For init positions 0..ni-2: zeros (not used in loss).
-        # For position ni-1 (last init): target = main_shuf[0] at orig pos orders[0]+ni.
-        # For position ni+i (main_shuf[i], i<t-1): target = main_shuf[i+1].
+        # For position ni-1 (last init): step 0 (predicts main_shuf[0]).
+        # For position ni+i (main_shuf[i], i<t-1): step i+1 (predicts main_shuf[i+1]).
         # For position ni+t-1 (last main): zeros.
         step_idx = torch.arange(t, dtype=torch.long, device=device).unsqueeze(0).expand(b, -1)  # [B, t], generation step index
         tpe_main = self.transformer.wtpe(step_idx)        # [B, t, 128]
