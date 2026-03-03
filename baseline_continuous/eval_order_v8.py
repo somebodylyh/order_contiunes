@@ -128,7 +128,7 @@ def main():
     ckpt_dir = os.path.join(os.path.dirname(__file__), 'checkpoints')
     models_to_eval = [
         ('MDM',          os.path.join(ckpt_dir, 'best_mdm_Random_model.pt'),    True),
-        ('AR shuffled',  os.path.join(ckpt_dir, 'best_ar_model.pt'),            False),
+        ('AR shuffled',  os.path.join(ckpt_dir, 'best_ar_model.pt'),            True),
         ('AR no-shuffle',os.path.join(ckpt_dir, 'best_ar_noshuffle_model.pt'),  False),
     ]
 
