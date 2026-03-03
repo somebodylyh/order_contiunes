@@ -305,7 +305,7 @@ class ContinuousAOGPT(nn.Module):
         pos_main_all = torch.arange(ni, ni + t, dtype=torch.long, device=device)
         init_pos_emb = self.transformer.wpe(pos_init).unsqueeze(0).expand(b, -1, -1)   # [B, ni, C]
         main_pos_emb = self.transformer.wpe(pos_main_all).unsqueeze(0).expand(b, -1, -1)  # [B, t, C]
-        main_pos_emb_shuf = self.shuffle(main_pos_emb, orders)                          # [B, t, C]
+        main_pos_emb_shuf = main_pos_emb                                                 # [B, t, C], seq-order pos (no shuffle)
         x = tok_emb + torch.cat([init_pos_emb, main_pos_emb_shuf], dim=1)               # [B, ni+t, C]
 
         # Target-position embeddings for AdaLN:
@@ -314,8 +314,8 @@ class ContinuousAOGPT(nn.Module):
         # For position ni-1 (last init): target = main_shuf[0] at orig pos orders[0]+ni.
         # For position ni+i (main_shuf[i], i<t-1): target = main_shuf[i+1].
         # For position ni+t-1 (last main): zeros.
-        main_orig_pos = orders + ni                        # [B, t], orig positions of main tokens
-        tpe_main = self.transformer.wtpe(main_orig_pos)   # [B, t, 128]
+        step_idx = torch.arange(t, dtype=torch.long, device=device).unsqueeze(0).expand(b, -1)  # [B, t], generation step index
+        tpe_main = self.transformer.wtpe(step_idx)        # [B, t, 128]
         zeros_early = torch.zeros(b, ni - 1, 128, device=device)   # [B, ni-1, 128]
         zeros_last  = torch.zeros(b, 1,      128, device=device)   # [B, 1,    128]
         # layout: [zeros(ni-1) | tpe_main(t) | zeros(1)] = ni+t total
