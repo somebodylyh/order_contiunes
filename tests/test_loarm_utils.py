@@ -92,16 +92,30 @@ def test_prefix_logprob_matches_loop():
             plackett_luce_logprob(logits, z, step_k=j) for j in range(k)
         ) if k > 0 else torch.zeros(B)
         got = plackett_luce_prefix_logprob(logits, z, step_k=k)
+        # atol=1e-4: logcumsumexp and sequential logsumexp differ in float32 evaluation order
         assert torch.allclose(got, expected, atol=1e-4), \
             f"k={k}: vectorized={got} vs loop={expected}"
 
 
 def test_prefix_logprob_gradient_flows():
-    """Gradient flows from prefix log prob back to logits."""
-    B, L = 2, 5
-    logits = torch.randn(B, L, requires_grad=True)
-    z = gumbel_top_k(logits.detach())
-    lp = plackett_luce_prefix_logprob(logits, z, step_k=3)
-    lp.sum().backward()
-    assert logits.grad is not None
-    assert logits.grad.abs().sum() > 0, "Expected non-zero gradient"
+    """Gradient of prefix log prob is numerically correct (verified with gradcheck)."""
+    import torch.autograd
+    B, L, k = 2, 5, 3
+    logits = torch.randn(B, L, dtype=torch.float64, requires_grad=True)   # float64 for gradcheck
+    z = gumbel_top_k(logits.detach().float()).long()   # int permutation, no grad
+
+    def fn(log):
+        return plackett_luce_prefix_logprob(log, z, step_k=k)
+
+    assert torch.autograd.gradcheck(fn, (logits,), eps=1e-6, atol=1e-4, rtol=1e-3), \
+        "Gradient of plackett_luce_prefix_logprob failed gradcheck"
+
+
+def test_prefix_logprob_full_permutation():
+    """step_k=L returns sum of all L step log-probs (full permutation log prob)."""
+    B, L = 3, 5
+    logits = torch.randn(B, L)
+    z = gumbel_top_k(logits)
+    full = plackett_luce_prefix_logprob(logits, z, step_k=L)
+    expected = sum(plackett_luce_logprob(logits, z, step_k=j) for j in range(L))
+    assert torch.allclose(full, expected, atol=1e-4)

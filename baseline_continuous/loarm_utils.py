@@ -72,6 +72,8 @@ def plackett_luce_prefix_logprob(
         log_prob: [B]  cumulative log prob of z[:, 0:k]
     """
     B, L = logits.shape
+    if not (0 <= step_k <= L):
+        raise ValueError(f"step_k must be in [0, L], got {step_k} with L={L}")
     if step_k == 0:
         return torch.zeros(B, device=logits.device, dtype=logits.dtype)
 
@@ -84,5 +86,6 @@ def plackett_luce_prefix_logprob(
     cumlogsum = torch.logcumsumexp(flipped, dim=1)
     log_denom = torch.flip(cumlogsum, dims=[1])
 
+    # Note: at j=L-1, log_probs_per_step[:,L-1] is exactly 0 (last item has prob 1).
     log_probs_per_step = logits_perm - log_denom   # [B, L]
     return log_probs_per_step[:, :step_k].sum(dim=1)  # [B]
