@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import torch
 from baseline_continuous.loarm_utils import gumbel_top_k, plackett_luce_logprob
+from baseline_continuous.loarm_utils import plackett_luce_prefix_logprob
 
 def test_gumbel_top_k_shape():
     """gumbel_top_k returns a valid permutation of shape [B, L]."""
@@ -49,3 +50,58 @@ def test_plackett_luce_logprob_shape():
     for k in range(L):
         lp = plackett_luce_logprob(logits, z, step_k=k)
         assert lp.shape == (B,), f"Step {k}: expected ({B},), got {lp.shape}"
+
+
+def test_prefix_logprob_shape():
+    """Returns [B] tensor for any valid k."""
+    B, L = 4, 8
+    logits = torch.randn(B, L)
+    z = gumbel_top_k(logits)
+    for k in range(L):
+        lp = plackett_luce_prefix_logprob(logits, z, step_k=k)
+        assert lp.shape == (B,), f"k={k}: expected ({B},), got {lp.shape}"
+
+
+def test_prefix_logprob_k0_is_zero():
+    """k=0 means empty prefix → log prob = 0 for all samples."""
+    B, L = 4, 8
+    logits = torch.randn(B, L)
+    z = gumbel_top_k(logits)
+    lp = plackett_luce_prefix_logprob(logits, z, step_k=0)
+    assert torch.allclose(lp, torch.zeros(B)), f"k=0 should be zeros, got {lp}"
+
+
+def test_prefix_logprob_k1_equals_step0():
+    """k=1 prefix has one element → equals plackett_luce_logprob at step 0."""
+    B, L = 4, 8
+    logits = torch.randn(B, L)
+    z = gumbel_top_k(logits)
+    prefix_lp = plackett_luce_prefix_logprob(logits, z, step_k=1)
+    step0_lp   = plackett_luce_logprob(logits, z, step_k=0)
+    assert torch.allclose(prefix_lp, step0_lp, atol=1e-5), \
+        f"k=1 prefix should equal step-0 log prob"
+
+
+def test_prefix_logprob_matches_loop():
+    """Vectorized result matches naive loop over plackett_luce_logprob."""
+    B, L = 3, 6
+    logits = torch.randn(B, L)
+    z = gumbel_top_k(logits)
+    for k in range(L):
+        expected = sum(
+            plackett_luce_logprob(logits, z, step_k=j) for j in range(k)
+        ) if k > 0 else torch.zeros(B)
+        got = plackett_luce_prefix_logprob(logits, z, step_k=k)
+        assert torch.allclose(got, expected, atol=1e-4), \
+            f"k={k}: vectorized={got} vs loop={expected}"
+
+
+def test_prefix_logprob_gradient_flows():
+    """Gradient flows from prefix log prob back to logits."""
+    B, L = 2, 5
+    logits = torch.randn(B, L, requires_grad=True)
+    z = gumbel_top_k(logits.detach())
+    lp = plackett_luce_prefix_logprob(logits, z, step_k=3)
+    lp.sum().backward()
+    assert logits.grad is not None
+    assert logits.grad.abs().sum() > 0, "Expected non-zero gradient"

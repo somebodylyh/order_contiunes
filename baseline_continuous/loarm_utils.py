@@ -51,3 +51,38 @@ def plackett_luce_logprob(logits: torch.Tensor, z: torch.Tensor, step_k: int) ->
     log_num = logits.gather(1, chosen.unsqueeze(1)).squeeze(1)  # [B]
 
     return log_num - log_denom
+
+
+def plackett_luce_prefix_logprob(
+    logits: torch.Tensor,
+    z: torch.Tensor,
+    step_k: int,
+) -> torch.Tensor:
+    """
+    Compute log q(z_{<k} | x) = Σ_{j=0}^{k-1} log PL(z_j | z_{<j}, logits).
+
+    This is the REINFORCE coefficient in LO-ARM Eq.(16): the log probability
+    of the prefix (first k elements of z), NOT the log prob at step k itself.
+
+    Args:
+        logits:  [B, L] Plackett-Luce scores
+        z:       [B, L] full permutation
+        step_k:  int in [0, L-1]. k=0 → empty prefix → returns zeros.
+    Returns:
+        log_prob: [B]  cumulative log prob of z[:, 0:k]
+    """
+    B, L = logits.shape
+    if step_k == 0:
+        return torch.zeros(B, device=logits.device, dtype=logits.dtype)
+
+    # logits_perm[b, j] = logits[b, z[b, j]]
+    logits_perm = logits.gather(1, z)   # [B, L]
+
+    # Denominator at step j = logsumexp(logits_perm[b, j:])
+    # via reversed cumulative logsumexp
+    flipped   = torch.flip(logits_perm, dims=[1])
+    cumlogsum = torch.logcumsumexp(flipped, dim=1)
+    log_denom = torch.flip(cumlogsum, dims=[1])
+
+    log_probs_per_step = logits_perm - log_denom   # [B, L]
+    return log_probs_per_step[:, :step_k].sum(dim=1)  # [B]
