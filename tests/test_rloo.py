@@ -33,9 +33,8 @@ def test_mask_policy_logprob_shape():
 
 
 def test_rloo_loss_stop_gradient():
-    """delta_F must not propagate gradients to the generator."""
-    B, D, L = 2, 16, 7
-    # Mock F values as leaf tensors with grad
+    """delta_F detach means F1.grad == -0.5*L/B regardless of log_q values."""
+    B, L = 2, 7
     F1 = torch.randn(B, requires_grad=True)
     F2 = torch.randn(B, requires_grad=True)
     log_q1 = torch.randn(B, requires_grad=True)
@@ -44,11 +43,15 @@ def test_rloo_loss_stop_gradient():
     loss = compute_rloo_loss(F1, F2, log_q1, log_q2, L_len=L)
     loss.backward()
 
-    # The gradient on F1 should come from the direct term, NOT delta_F
-    # We just check that no RuntimeError is raised and grads exist
-    assert F1.grad is not None
-    assert F2.grad is not None
+    # If delta_F is correctly detached, the gradient on F1 comes ONLY from
+    # the direct term -0.5*L*(F1+F2).mean() → d/dF1[i] = -0.5*L/B
+    expected_grad = torch.full((B,), -0.5 * L / B)
+    assert torch.allclose(F1.grad, expected_grad, atol=1e-5), \
+        f"F1.grad={F1.grad} — delta_F detach may be broken"
+    assert torch.allclose(F2.grad, expected_grad, atol=1e-5), \
+        f"F2.grad={F2.grad}"
     assert log_q1.grad is not None
+    assert log_q2.grad is not None
 
 
 def test_rloo_loss_symmetry():
