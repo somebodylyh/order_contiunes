@@ -33,7 +33,10 @@ class QNetwork(nn.Module):
             nn.GELU(),
             nn.Linear(4 * hidden_dim, seq_len),
         )
-        # Zero-init output → starts as uniform Plackett-Luce (like AO-ARM)
+        # Zero-init output layer → all logits=0 at init = uniform Plackett-Luce (≡ AO-ARM).
+        # Side effect: net[0] receives zero gradient on the first backward pass because
+        # d_loss/d_hidden = net[2].weight.T @ grad_output and net[2].weight == 0 initially.
+        # This is intentional and resolves automatically after the first optimizer step.
         nn.init.zeros_(self.net[-1].weight)
         nn.init.zeros_(self.net[-1].bias)
 

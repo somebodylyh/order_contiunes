@@ -29,16 +29,24 @@ def test_qnetwork_sampling():
 
 
 def test_qnetwork_gradients_flow():
-    """Gradient flows from plackett_luce_logprob through QNetwork parameters."""
+    """Gradient flows from plackett_luce_logprob through QNetwork output layer."""
     B, L, D = 2, 5, 16
     q_net = QNetwork(vector_dim=D, seq_len=L, hidden_dim=32)
     x = torch.randn(B, L, D)
     logits = q_net(x)
     z = gumbel_top_k(logits)
-    # Compute log prob at step 0
     lp = plackett_luce_logprob(logits, z, step_k=0)
     loss = -lp.mean()
     loss.backward()
-    # Check that at least one parameter has a gradient
-    grads = [p.grad for p in q_net.parameters() if p.grad is not None]
-    assert len(grads) > 0, "No gradients flowed to QNetwork"
+
+    # net[2] (output projection) must receive a nonzero gradient — it is
+    # directly in the logits→loss path.
+    out_grad = q_net.net[2].weight.grad
+    assert out_grad is not None and out_grad.abs().max() > 0, \
+        "Output layer received no gradient"
+
+    # net[0] (input projection) has zero gradient at step 0 by design:
+    # zero-init on net[2].weight means d_loss/d_hidden=0 at initialisation.
+    # The grad tensor is still allocated (backward was called).
+    in_grad = q_net.net[0].weight.grad
+    assert in_grad is not None, "Input layer grad tensor was not allocated"
