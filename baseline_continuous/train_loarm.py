@@ -25,7 +25,9 @@ from baseline_continuous import config as cfg
 from baseline_continuous.continuous_aogpt import ContinuousAOGPT, ContinuousAOGPTConfig
 from baseline_continuous.continuous_loarm import ContinuousLOARM
 from baseline_continuous.variational_q import QNetwork
-from baseline_continuous.loarm_utils import gumbel_top_k, plackett_luce_logprob
+from baseline_continuous.loarm_utils import (
+    gumbel_top_k, plackett_luce_logprob, plackett_luce_prefix_logprob
+)
 from baseline_continuous.rloo import compute_gen_log_lik, mask_policy_logprob, compute_rloo_loss
 from baseline_continuous.eval_utils import evaluate_ar
 from baseline_continuous.disk_dataset import create_disk_dataloaders
@@ -111,16 +113,20 @@ def compute_batch_loss(model, q_net, batch, device, sigma2):
     log_p_pol1 = mask_policy_logprob(masked_pol1[:, k, :], chosen1)
     log_p_pol2 = mask_policy_logprob(masked_pol2[:, k, :], chosen2)
 
-    # 5c. Variational log-prob (Plackett-Luce under q_θ)
-    log_q1 = plackett_luce_logprob(q_logits, z1, step_k=k)   # [B]
-    log_q2 = plackett_luce_logprob(q_logits, z2, step_k=k)
+    # 5c. Variational log-probs (Plackett-Luce under q_θ)
+    # log_q_step:   log q(z_k | z_{<k}, x)  — used inside F (current step only)
+    # log_q_prefix: log q(z_{<k} | x)        — used in REINFORCE (prefix sum, LO-ARM Eq.16)
+    log_q1_step   = plackett_luce_logprob(q_logits, z1, step_k=k)          # [B]
+    log_q2_step   = plackett_luce_logprob(q_logits, z2, step_k=k)
+    log_q1_prefix = plackett_luce_prefix_logprob(q_logits, z1, step_k=k)   # [B]
+    log_q2_prefix = plackett_luce_prefix_logprob(q_logits, z2, step_k=k)
 
-    # 5d. F = log_p_gen + log_p_pol - log_q
-    F1 = log_p_gen1 + log_p_pol1 - log_q1
-    F2 = log_p_gen2 + log_p_pol2 - log_q2
+    # 5d. F = log_p_gen + log_p_pol - log_q_step  (uses current-step q)
+    F1 = log_p_gen1 + log_p_pol1 - log_q1_step
+    F2 = log_p_gen2 + log_p_pol2 - log_q2_step
 
-    # ── 6. RLOO loss ─────────────────────────────────────────────────────────
-    loss = compute_rloo_loss(F1, F2, log_q1, log_q2, L_len=L)
+    # ── 6. RLOO loss (REINFORCE uses prefix log_q, per LO-ARM Eq.16) ─────────
+    loss = compute_rloo_loss(F1, F2, log_q1_prefix, log_q2_prefix, L_len=L)
 
     # Auxiliary metrics (no grad needed)
     with torch.no_grad():
@@ -132,7 +138,8 @@ def compute_batch_loss(model, q_net, batch, device, sigma2):
         'F1_mean':        F1.mean().item(),
         'log_p_gen1':     log_p_gen1.mean().item(),
         'log_p_pol1':     log_p_pol1.mean().item(),
-        'log_q1':         log_q1.mean().item(),
+        'log_q1_step':    log_q1_step.mean().item(),
+        'log_q1_prefix':  log_q1_prefix.mean().item(),
         'policy_entropy': policy_entropy.item(),
         'step_k':         k,
     }
