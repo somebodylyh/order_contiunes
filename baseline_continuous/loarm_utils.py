@@ -9,7 +9,6 @@ Log-prob: log p(z_k | z_{<k}) = θ_{z_k} - logsumexp(θ[remaining])
 """
 
 import torch
-import torch.nn.functional as F
 
 
 def gumbel_top_k(logits: torch.Tensor) -> torch.Tensor:
@@ -22,7 +21,7 @@ def gumbel_top_k(logits: torch.Tensor) -> torch.Tensor:
         z: [B, L] long tensor, each row is a permutation of 0..L-1
     """
     gumbel_noise = -torch.log(-torch.log(
-        torch.clamp(torch.rand_like(logits), min=1e-20, max=1.0)
+        torch.clamp(torch.rand_like(logits), min=1e-20, max=1.0 - 1e-7)
     ))
     noisy_logits = logits + gumbel_noise
     return torch.argsort(noisy_logits, dim=-1, descending=True)
