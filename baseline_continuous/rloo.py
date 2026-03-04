@@ -13,8 +13,8 @@ where F_θ(z_{<i}, x) = log p_gen(x_{z_i} | z_{<i}) + log p_policy(z_i | z_{<i})
 
 We express this as a scalar loss whose .backward() gives the correct gradient:
 
-  loss = -0.5 * L * (F1 + F2)                   ← direct F gradient
-       + 0.5 * L * ΔF.detach() * (log_q1 - log_q2)  ← REINFORCE on q; ★ stop-grad on ΔF
+  loss = -0.5 * L * (F1 + F2)                                    ← direct F gradient
+       + 0.5 * L * ΔF.detach() * (log_q1_prefix - log_q2_prefix)  ← REINFORCE on q; ★ stop-grad on ΔF
 
 Key invariant: ΔF = (F1 - F2) MUST be detached to avoid spurious feedback
                into the generator via the control-variate term.
@@ -68,33 +68,35 @@ def mask_policy_logprob(
 def compute_rloo_loss(
     F1: torch.Tensor,
     F2: torch.Tensor,
-    log_q1: torch.Tensor,
-    log_q2: torch.Tensor,
+    log_q1_prefix: torch.Tensor,
+    log_q2_prefix: torch.Tensor,
     L_len: int,
 ) -> torch.Tensor:
     """
-    Scalar loss whose .backward() gives the RLOO gradient estimate.
+    Scalar loss whose .backward() gives the RLOO gradient estimate (LO-ARM Eq.16).
 
     Args:
-        F1:     [B]  F_θ(z1_{<i}, x)  — MUST be computed with grad
-        F2:     [B]  F_θ(z2_{<i}, x)  — MUST be computed with grad
-        log_q1: [B]  log q(z1_i | z1_{<i}, x) — MUST be computed with grad
-        log_q2: [B]  log q(z2_i | z2_{<i}, x) — MUST be computed with grad
-        L_len:  int  sequence length L (scaling factor from Eq. 11)
+        F1:            [B]  F_θ(z1_{<i}, x)  — with grad (includes -log_q_step)
+        F2:            [B]  F_θ(z2_{<i}, x)  — with grad
+        log_q1_prefix: [B]  log q(z1_{<k}|x) = Σ_{j<k} log PL(z1_j|z1_{<j})
+                            REINFORCE coefficient — with grad
+        log_q2_prefix: [B]  log q(z2_{<k}|x) — with grad
+        L_len:         int  sequence length L (scaling factor from Eq.11)
     Returns:
-        loss: scalar (mean over batch)
+        loss: scalar (mean over batch, to be minimised)
 
-    ★ CRITICAL: delta_F is detached. This is the RLOO control-variate trick.
-      Without .detach(), gradients would flow from the control-variate term
-      back into the generator, breaking the unbiasedness of RLOO.
+    ★ CRITICAL: delta_F is detached (stop-gradient on ΔF).
+      The direct term -0.5*L*(F1+F2) gives gradient to generator + policy.
+      The REINFORCE term 0.5*L*ΔF*(log_q1_prefix-log_q2_prefix) gives gradient
+      only to the q-network via the PREFIX log probs, per LO-ARM Eq.(16).
     """
-    delta_F = (F1 - F2).detach()   # ★ stop gradient here
+    delta_F = (F1 - F2).detach()   # ★ stop gradient
 
-    # Direct F terms: gradient flows to both generator and policy
+    # Direct F terms: gradient flows to generator and policy head
     direct_term = -0.5 * L_len * (F1 + F2)
 
-    # REINFORCE term: gradient only flows to q_net (log_q1, log_q2)
-    reinforce_term = 0.5 * L_len * delta_F * (log_q1 - log_q2)
+    # REINFORCE term: gradient flows only to q_net via prefix log probs
+    reinforce_term = 0.5 * L_len * delta_F * (log_q1_prefix - log_q2_prefix)
 
     loss = direct_term + reinforce_term
     return loss.mean()

@@ -33,37 +33,52 @@ def test_mask_policy_logprob_shape():
 
 
 def test_rloo_loss_stop_gradient():
-    """delta_F detach means F1.grad == -0.5*L/B regardless of log_q values."""
+    """delta_F detach means F1.grad == -0.5*L/B regardless of log_q_prefix values."""
     B, L = 2, 7
-    F1 = torch.randn(B, requires_grad=True)
-    F2 = torch.randn(B, requires_grad=True)
-    log_q1 = torch.randn(B, requires_grad=True)
-    log_q2 = torch.randn(B, requires_grad=True)
+    F1            = torch.randn(B, requires_grad=True)
+    F2            = torch.randn(B, requires_grad=True)
+    log_q1_prefix = torch.randn(B, requires_grad=True)
+    log_q2_prefix = torch.randn(B, requires_grad=True)
 
-    loss = compute_rloo_loss(F1, F2, log_q1, log_q2, L_len=L)
+    loss = compute_rloo_loss(F1, F2, log_q1_prefix, log_q2_prefix, L_len=L)
     loss.backward()
 
-    # If delta_F is correctly detached, the gradient on F1 comes ONLY from
-    # the direct term -0.5*L*(F1+F2).mean() → d/dF1[i] = -0.5*L/B
     expected_grad = torch.full((B,), -0.5 * L / B)
     assert torch.allclose(F1.grad, expected_grad, atol=1e-5), \
         f"F1.grad={F1.grad} — delta_F detach may be broken"
     assert torch.allclose(F2.grad, expected_grad, atol=1e-5), \
         f"F2.grad={F2.grad}"
-    assert log_q1.grad is not None
-    assert log_q2.grad is not None
+    assert log_q1_prefix.grad is not None
+    assert log_q2_prefix.grad is not None
 
 
 def test_rloo_loss_symmetry():
-    """Swapping (F1,log_q1) and (F2,log_q2) should give the same loss value."""
+    """Swapping (F1,log_q1_prefix) and (F2,log_q2_prefix) gives the same loss."""
     B, L = 4, 7
-    F1    = torch.randn(B)
-    F2    = torch.randn(B)
-    log_q1 = torch.randn(B)
-    log_q2 = torch.randn(B)
+    F1            = torch.randn(B)
+    F2            = torch.randn(B)
+    log_q1_prefix = torch.randn(B)
+    log_q2_prefix = torch.randn(B)
 
-    loss_ab = compute_rloo_loss(F1, F2, log_q1, log_q2, L_len=L)
-    loss_ba = compute_rloo_loss(F2, F1, log_q2, log_q1, L_len=L)
-    # Both should give the same scalar
+    loss_ab = compute_rloo_loss(F1, F2, log_q1_prefix, log_q2_prefix, L_len=L)
+    loss_ba = compute_rloo_loss(F2, F1, log_q2_prefix, log_q1_prefix, L_len=L)
     assert torch.isclose(loss_ab, loss_ba, atol=1e-5), \
         f"loss_ab={loss_ab.item():.4f}, loss_ba={loss_ba.item():.4f}"
+
+
+def test_rloo_reinforce_gradient_only_on_prefix():
+    """REINFORCE term gradient flows to log_q_prefix, not to F1/F2 directly."""
+    B, L = 2, 7
+    F1            = torch.randn(B, requires_grad=True)
+    F2            = torch.randn(B, requires_grad=True)
+    log_q1_prefix = torch.randn(B, requires_grad=True)
+    log_q2_prefix = torch.randn(B, requires_grad=True)
+
+    loss = compute_rloo_loss(F1, F2, log_q1_prefix, log_q2_prefix, L_len=L)
+    loss.backward()
+
+    # F1 gradient must be exactly -0.5*L/B (no REINFORCE contribution to F)
+    expected_f_grad = torch.full((B,), -0.5 * L / B)
+    assert torch.allclose(F1.grad, expected_f_grad, atol=1e-5)
+    # log_q_prefix gradient must be non-zero (REINFORCE provides signal)
+    assert log_q1_prefix.grad.abs().sum() > 0
