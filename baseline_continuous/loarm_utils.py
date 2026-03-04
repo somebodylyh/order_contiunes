@@ -67,7 +67,7 @@ def plackett_luce_prefix_logprob(
     Args:
         logits:  [B, L] Plackett-Luce scores
         z:       [B, L] full permutation
-        step_k:  int in [0, L-1]. k=0 → empty prefix → returns zeros.
+        step_k:  int in [0, L]. k=0 → empty prefix → returns zeros. k=L → full permutation.
     Returns:
         log_prob: [B]  cumulative log prob of z[:, 0:k]
     """
