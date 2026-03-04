@@ -130,9 +130,8 @@ def compute_batch_loss(model, q_net, batch, device, sigma2):
 
     # Auxiliary metrics (no grad needed)
     with torch.no_grad():
-        logits_k = masked_pol1[:, k, :].nan_to_num(nan=0., neginf=-1e9)
-        probs_k  = F.softmax(logits_k, dim=-1)
-        policy_entropy = -(probs_k * probs_k.clamp(min=1e-30).log()).sum(dim=-1).mean()
+        probs_k  = F.softmax(masked_pol1[:, k, :], dim=-1)
+        policy_entropy = -(probs_k * (probs_k + 1e-30).log()).sum(dim=-1).mean()
 
     aux = {
         'F1_mean':        F1.mean().item(),
@@ -209,6 +208,8 @@ def main():
     # q_net at 1/3 LR (god-view network, should not dominate)
     q_params = list(q_net.parameters())
     optimizer.add_param_group({'params': q_params, 'lr': learning_rate / 3.0, 'weight_decay': 0.0})
+    # Store per-group LR ratios so the scheduler preserves relative scaling
+    lr_ratios = [pg['lr'] / learning_rate for pg in optimizer.param_groups]
 
     # ── WandB ────────────────────────────────────────────────────────────────
     if wandb_log:
@@ -231,8 +232,8 @@ def main():
     for epoch in range(epochs):
         for batch in train_loader:
             lr = get_lr(global_step, warmup_iters, max_iters, learning_rate)
-            for pg in optimizer.param_groups:
-                pg['lr'] = lr
+            for pg, ratio in zip(optimizer.param_groups, lr_ratios):
+                pg['lr'] = lr * ratio
 
             loss, aux = compute_batch_loss(model, q_net, batch, device, sigma2)
 
