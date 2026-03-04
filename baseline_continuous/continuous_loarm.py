@@ -63,6 +63,8 @@ class ContinuousLOARM(nn.Module):
         device = vectors.device
         b, t, d = vectors.size()
         ni = init_vectors.shape[1]
+        assert ni + t <= base.config.block_size + 1, \
+            f"ni+t={ni+t} exceeds block_size+1={base.config.block_size+1}"
 
         # Replicate ContinuousAOGPT.forward_fn init-prefix path but
         # intercept hidden states before output_proj to also run policy_head.
@@ -85,10 +87,11 @@ class ContinuousLOARM(nn.Module):
         # AdaLN step-index conditioning
         # Layout: [zeros(ni-1) | tpe_main(t) | zeros(1)] = ni+t total
         step_idx = torch.arange(t, dtype=torch.long, device=device).unsqueeze(0).expand(b, -1)
-        tpe_main     = base.transformer.wtpe(step_idx)                # [B, t, 128]
-        zeros_early  = torch.zeros(b, ni - 1, 128, device=device)    # [B, ni-1, 128]
-        zeros_last   = torch.zeros(b, 1,      128, device=device)    # [B, 1,    128]
-        adaLN_cond   = torch.cat([zeros_early, tpe_main, zeros_last], dim=1)  # [B, ni+t, 128]
+        tpe_main     = base.transformer.wtpe(step_idx)                  # [B, t, tpe_dim]
+        tpe_dim      = tpe_main.shape[-1]
+        zeros_early  = torch.zeros(b, ni - 1, tpe_dim, device=device)  # [B, ni-1, tpe_dim]
+        zeros_last   = torch.zeros(b, 1,      tpe_dim, device=device)  # [B, 1,    tpe_dim]
+        adaLN_cond   = torch.cat([zeros_early, tpe_main, zeros_last], dim=1)  # [B, ni+t, tpe_dim]
 
         # Transformer forward
         x = base.transformer.drop(x)
