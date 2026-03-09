@@ -36,6 +36,8 @@ def parse_args():
     parser.add_argument('--data_dir', type=str, default=os.path.join(os.path.dirname(__file__), 'data'))
     parser.add_argument('--no_shuffle', action='store_true',
                         help='Use original ordered vectors instead of shuffled (pure AR baseline)')
+    parser.add_argument('--n_layer', type=int, default=None)
+    parser.add_argument('--n_embd', type=int, default=None)
     return parser.parse_args()
 
 
@@ -84,11 +86,30 @@ def main():
 
     # Load data from disk (memmap, near-zero memory)
     print("\nLoading data from disk...")
+    # Override config from data_config.pt if available
+    data_config_path = os.path.join(args.data_dir, 'data_config.pt')
+    if os.path.exists(data_config_path):
+        data_cfg = torch.load(data_config_path, map_location='cpu', weights_only=False)
+        vector_dim = data_cfg.get('vector_dim', cfg.vector_dim)
+        num_init = data_cfg.get('num_init', cfg.num_init)
+        seq_length = data_cfg.get('seq_length', cfg.seq_length)
+        print(f"  [data_config] vector_dim={vector_dim}, num_init={num_init}, seq_length={seq_length}")
+    else:
+        vector_dim = cfg.vector_dim
+        num_init = cfg.num_init
+        seq_length = cfg.seq_length
+
+    block_size = seq_length
+    # num_chunks 按比例调整：每 chunk ~8 token
+    num_chunks = max(1, (seq_length - num_init) // 8)
+    n_layer = args.n_layer if args.n_layer is not None else cfg.n_layer
+    n_embd = args.n_embd if args.n_embd is not None else cfg.n_embd
+
     train_loader, val_loader, test_loader = create_disk_dataloaders(
         data_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=cfg.num_workers,
-        num_chunks=cfg.num_chunks,
+        num_chunks=num_chunks,
     )
 
     # Compute total iterations for LR schedule
@@ -100,14 +121,14 @@ def main():
     # Create model
     print("\nCreating model...")
     model_config = ContinuousAOGPTConfig(
-        block_size=cfg.block_size,
-        vector_dim=cfg.vector_dim,
-        n_layer=cfg.n_layer,
+        block_size=block_size,
+        vector_dim=vector_dim,
+        n_layer=n_layer,
         n_head=cfg.n_head,
-        n_embd=cfg.n_embd,
+        n_embd=n_embd,
         dropout=cfg.dropout,
         bias=cfg.bias,
-        num_init=cfg.num_init,
+        num_init=num_init,
     )
     model = ContinuousAOGPT(model_config)
     model = model.to(device)
@@ -127,11 +148,11 @@ def main():
         wandb.init(project=cfg.wandb_project, name=run_name, group='baseline-comparison', config={
             'mode': 'AR',
             'no_shuffle': no_shuffle,
-            'vector_dim': cfg.vector_dim,
-            'seq_length': cfg.seq_length,
-            'n_layer': cfg.n_layer,
+            'vector_dim': vector_dim,
+            'seq_length': seq_length,
+            'n_layer': n_layer,
             'n_head': cfg.n_head,
-            'n_embd': cfg.n_embd,
+            'n_embd': n_embd,
             'batch_size': batch_size,
             'learning_rate': learning_rate,
             'epochs': epochs,
@@ -229,7 +250,7 @@ def main():
 
     # ── Extended final evaluation ──────────────────────────────────────────
     print("\nRunning extended final evaluation...")
-    t_steps = list(range(cfg.num_chunks))
+    t_steps = list(range(num_chunks))
 
     ps_loss = evaluate_per_step_loss(ema_model, test_loader, device)
     print(f"  per-step causal loss  first3={ps_loss[:3].round(4)}  last3={ps_loss[-3:].round(4)}")
