@@ -40,6 +40,16 @@ def parse_args():
                         help='Training mode: Random (full random), Block_Shuffle (block-constrained random), or Random_CL (curriculum)')
     parser.add_argument('--random_ratio', type=float, default=0.5,
                         help='Ratio of random orders in Random_CL mode')
+    parser.add_argument('--n_layer', type=int, default=None)
+    parser.add_argument('--n_embd', type=int, default=None)
+    parser.add_argument('--n_head', type=int, default=None)
+    parser.add_argument('--pos_mode', type=str, default='identity',
+                        choices=['slot', 'zeros', 'identity'],
+                        help='Position encoding for main tokens')
+    parser.add_argument('--data_shuffle', type=str, default='none',
+                        choices=['none', 'block', 'full'],
+                        help='Data shuffle: none (original order), block (block-wise), full (per-sample random)')
+    parser.add_argument('--wandb_project', type=str, default=None)
     return parser.parse_args()
 
 
@@ -83,17 +93,37 @@ def main():
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
 
+    data_shuffle = args.data_shuffle
+    wandb_project = args.wandb_project if args.wandb_project else cfg.wandb_project
+
     print("=" * 60)
-    print(f"ContinuousAOGPT — MDM Training (mode={train_mode})")
+    print(f"ContinuousAOGPT — MDM Training (mode={train_mode}, data_shuffle={data_shuffle})")
     print("=" * 60)
 
     # Load data from disk (memmap, near-zero memory)
     print("\nLoading data from disk...")
+
+    # Override config from data_config.pt if available
+    data_config_path = os.path.join(args.data_dir, 'data_config.pt')
+    if os.path.exists(data_config_path):
+        data_cfg = torch.load(data_config_path, map_location='cpu', weights_only=False)
+        vector_dim = data_cfg.get('vector_dim', cfg.vector_dim)
+        num_init = data_cfg.get('num_init', cfg.num_init)
+        seq_length = data_cfg.get('seq_length', cfg.seq_length)
+        print(f"  [data_config] vector_dim={vector_dim}, num_init={num_init}, seq_length={seq_length}")
+    else:
+        vector_dim = cfg.vector_dim
+        num_init = cfg.num_init
+        seq_length = cfg.seq_length
+
+    block_size = seq_length
+    num_chunks = max(1, (seq_length - num_init) // 8)
+
     train_loader, val_loader, test_loader = create_disk_dataloaders(
         data_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=cfg.num_workers,
-        num_chunks=cfg.num_chunks,
+        num_chunks=num_chunks,
     )
 
     # Compute total iterations for LR schedule
@@ -103,16 +133,21 @@ def main():
     print(f"  {iters_per_epoch} iters/epoch x {epochs} epochs = {max_iters} total iters")
 
     # Create model
-    print("\nCreating model...")
+    n_layer = args.n_layer if args.n_layer is not None else cfg.n_layer
+    n_embd = args.n_embd if args.n_embd is not None else cfg.n_embd
+    n_head = args.n_head if args.n_head is not None else cfg.n_head
+    pos_mode = args.pos_mode
+
+    print(f"\nCreating model... (n_layer={n_layer}, n_embd={n_embd}, n_head={n_head}, pos_mode={pos_mode})")
     model_config = ContinuousAOGPTConfig(
-        block_size=cfg.block_size,
-        vector_dim=cfg.vector_dim,
-        n_layer=cfg.n_layer,
-        n_head=cfg.n_head,
-        n_embd=cfg.n_embd,
+        block_size=block_size,
+        vector_dim=vector_dim,
+        n_layer=n_layer,
+        n_head=n_head,
+        n_embd=n_embd,
         dropout=cfg.dropout,
         bias=cfg.bias,
-        num_init=cfg.num_init,
+        num_init=num_init,
     )
     model = ContinuousAOGPT(model_config)
     model = model.to(device)
@@ -128,14 +163,18 @@ def main():
 
     if wandb_log:
         import wandb
-        wandb.init(project=cfg.wandb_project, name=f'mdm-{train_mode}', group='baseline-comparison', config={
+        run_name = f'mdm-{data_shuffle}'
+        wandb.init(project=wandb_project, name=run_name, group='mdm', config={
+            'model_type': 'MDM',
             'mode': train_mode,
+            'data_shuffle': data_shuffle,
+            'pos_mode': pos_mode,
             'random_ratio': random_ratio if train_mode == 'Random_CL' else None,
-            'vector_dim': cfg.vector_dim,
-            'seq_length': cfg.seq_length,
-            'n_layer': cfg.n_layer,
-            'n_head': cfg.n_head,
-            'n_embd': cfg.n_embd,
+            'vector_dim': vector_dim,
+            'seq_length': seq_length,
+            'n_layer': n_layer,
+            'n_head': n_head,
+            'n_embd': n_embd,
             'batch_size': batch_size,
             'learning_rate': learning_rate,
             'epochs': epochs,
@@ -156,16 +195,25 @@ def main():
     for epoch in range(epochs):
         for batch in train_loader:
             init_vectors = batch['init_vectors'].to(device)
-            vectors = batch['shuffled_main'].to(device)
+            if data_shuffle == 'none':
+                vectors = batch['main_vectors'].to(device)
+            elif data_shuffle == 'block':
+                vectors = batch['shuffled_main'].to(device)
+            else:  # full
+                vectors = batch['main_vectors'].to(device)
+                B_v, t_v, D_v = vectors.shape
+                perms = torch.stack([torch.randperm(t_v, device=device) for _ in range(B_v)])
+                batch_idx = torch.arange(B_v, device=device).unsqueeze(1).expand(-1, t_v)
+                vectors = vectors[batch_idx, perms]
 
             lr = get_lr(global_step, warmup_iters, max_iters, learning_rate)
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
 
             if train_mode == 'Random':
-                _, loss = model(vectors, mode='Random', init_vectors=init_vectors)
+                _, loss = model(vectors, mode='Random', init_vectors=init_vectors, pos_mode=pos_mode)
             elif train_mode == 'Random_CL':
-                _, loss = model(vectors, mode='Random_CL', random_ratio=random_ratio, init_vectors=init_vectors)
+                _, loss = model(vectors, mode='Random_CL', random_ratio=random_ratio, init_vectors=init_vectors, pos_mode=pos_mode)
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -203,7 +251,7 @@ def main():
                         'epoch': epoch,
                         'global_step': global_step,
                         'val_loss': best_val_loss,
-                    }, os.path.join(save_path, f'best_mdm_{train_mode}_model.pt'))
+                    }, os.path.join(save_path, f'best_mdm_{data_shuffle}_model.pt'))
                     print(f"  [save] Best model saved (val_loss: {best_val_loss:.4f})")
 
                 model.train()
@@ -235,7 +283,7 @@ def main():
 
     # ── Extended final evaluation ──────────────────────────────────────────
     print("\nRunning extended final evaluation...")
-    t_steps = list(range(cfg.num_chunks))
+    t_steps = list(range(num_chunks))
 
     ps_loss = evaluate_per_step_loss(ema_model, test_loader, device)
     print(f"  per-step causal loss  first3={ps_loss[:3].round(4)}  last3={ps_loss[-3:].round(4)}")

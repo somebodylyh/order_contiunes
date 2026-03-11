@@ -230,29 +230,38 @@ class ContinuousAOGPT(nn.Module):
         unshuffled_x[batch_indices, orders] = shuffled_x
         return unshuffled_x
 
-    def forward(self, vectors, mode='Random', orders=None, random_ratio=None, init_vectors=None):
+    def forward(self, vectors, mode='Random', orders=None, random_ratio=None, init_vectors=None, pos_mode='slot'):
+        """
+        pos_mode controls how main-token wpe is computed:
+          'slot'     – current default: wpe(ni, ni+1, ..., ni+t-1)
+          'identity' – shuffled_main identity: wpe(ni + orders[i]) per step
+          'none'     – no wpe for main tokens (zeros)
+        """
         if mode is None:
             assert orders is not None, 'mode is None, orders must be provided'
-            return self.forward_fn(vectors, orders, init_vectors)
+            return self.forward_fn(vectors, orders, init_vectors, pos_mode=pos_mode)
         elif mode == 'AR':
             orders = self.set_ascending_orders(vectors)
-            return self.forward_fn(vectors, orders, init_vectors)
+            return self.forward_fn(vectors, orders, init_vectors, pos_mode=pos_mode)
         elif mode == 'Random':
             orders = self.sample_random_orders(vectors)
-            return self.forward_fn(vectors, orders, init_vectors)
+            return self.forward_fn(vectors, orders, init_vectors, pos_mode=pos_mode)
         elif mode == 'Random_CL':
             assert random_ratio is not None
             orders = self.sample_random_orders_CL(vectors, random_ratio)
-            return self.forward_fn(vectors, orders, init_vectors)
+            return self.forward_fn(vectors, orders, init_vectors, pos_mode=pos_mode)
         else:
             raise ValueError(f"Unknown mode: {mode}")
 
-    def forward_fn(self, vectors, orders, init_vectors=None):
+    def forward_fn(self, vectors, orders, init_vectors=None, pos_mode='slot'):
         """
         vectors:      [B, L, D]        main tokens to predict (excl. init prefix)
         orders:       [B, L]           generation order for main tokens
         init_vectors: [B, num_init, D] fixed conditioning prefix (always visible, not predicted)
                                        If None, falls back to legacy [None]-token mode.
+        pos_mode:     'slot'     – wpe(ni, ni+1, ...) regardless of shuffle (default)
+                      'zeros'    – no wpe for main tokens
+                      'identity' – wpe follows token identity (shuffled with tokens)
         """
         device = vectors.device
         b, t, d = vectors.size()
@@ -300,26 +309,35 @@ class ContinuousAOGPT(nn.Module):
         main_emb = self.input_proj(main_shuffled)         # [B, t,  C]
         tok_emb  = torch.cat([init_emb, main_emb], dim=1)  # [B, ni+t, C]
 
-        # Position embeddings: init at positions 0..ni-1; main at original positions ni..ni+t-1
+        # Position embeddings for main tokens depend on pos_mode
         pos_init = torch.arange(ni, dtype=torch.long, device=device)
-        pos_main_all = torch.arange(ni, ni + t, dtype=torch.long, device=device)
         init_pos_emb = self.transformer.wpe(pos_init).unsqueeze(0).expand(b, -1, -1)   # [B, ni, C]
-        main_pos_emb = self.transformer.wpe(pos_main_all).unsqueeze(0).expand(b, -1, -1)  # [B, t, C]
-        main_pos_emb_shuf = main_pos_emb                                                 # [B, t, C], seq-order pos (no shuffle)
+        if pos_mode == 'zeros':
+            main_pos_emb_shuf = torch.zeros(b, t, init_pos_emb.shape[-1], device=device)
+        elif pos_mode == 'identity':
+            pos_main_all = torch.arange(ni, ni + t, dtype=torch.long, device=device)
+            main_pos_emb = self.transformer.wpe(pos_main_all).unsqueeze(0).expand(b, -1, -1)
+            main_pos_emb_shuf = self.shuffle(main_pos_emb, orders)
+        else:  # 'slot'
+            pos_main_all = torch.arange(ni, ni + t, dtype=torch.long, device=device)
+            main_pos_emb_shuf = self.transformer.wpe(pos_main_all).unsqueeze(0).expand(b, -1, -1)
         x = tok_emb + torch.cat([init_pos_emb, main_pos_emb_shuf], dim=1)               # [B, ni+t, C]
 
         # Target-position embeddings for AdaLN:
-        # Tells the model which generation step it is predicting (0-indexed).
+        # Tells the model which ORIGINAL POSITION it is predicting at each slot.
+        # Following the original AO-GPT: wtpe encodes original position indices,
+        # then is shuffled with tokens so each slot knows its target identity.
         # For init positions 0..ni-2: zeros (not used in loss).
-        # For position ni-1 (last init): step 0 (predicts main_shuf[0]).
-        # For position ni+i (main_shuf[i], i<t-1): step i+1 (predicts main_shuf[i+1]).
+        # For position ni-1 (last init): wtpe of original pos of main_shuf[0].
+        # For position ni+i: wtpe of original pos of main_shuf[i+1].
         # For position ni+t-1 (last main): zeros.
-        step_idx = torch.arange(t, dtype=torch.long, device=device).unsqueeze(0).expand(b, -1)  # [B, t], generation step index
-        tpe_main = self.transformer.wtpe(step_idx)        # [B, t, 128]
+        orig_pos_idx = torch.arange(t, dtype=torch.long, device=device).unsqueeze(0).expand(b, -1)  # [B, t]
+        tpe_orig = self.transformer.wtpe(orig_pos_idx)    # [B, t, 128], indexed by original position
+        tpe_shuffled = self.shuffle(tpe_orig, orders)     # [B, t, 128], shuffled with tokens
         zeros_early = torch.zeros(b, ni - 1, 128, device=device)   # [B, ni-1, 128]
         zeros_last  = torch.zeros(b, 1,      128, device=device)   # [B, 1,    128]
-        # layout: [zeros(ni-1) | tpe_main(t) | zeros(1)] = ni+t total
-        target_pos_emb_final = torch.cat([zeros_early, tpe_main, zeros_last], dim=1)  # [B, ni+t, 128]
+        # layout: [zeros(ni-1) | tpe_shuffled(t) | zeros(1)] = ni+t total
+        target_pos_emb_final = torch.cat([zeros_early, tpe_shuffled, zeros_last], dim=1)  # [B, ni+t, 128]
 
         # Transformer forward
         x = self.transformer.drop(x)

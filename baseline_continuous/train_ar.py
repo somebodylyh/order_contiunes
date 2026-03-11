@@ -36,8 +36,14 @@ def parse_args():
     parser.add_argument('--data_dir', type=str, default=os.path.join(os.path.dirname(__file__), 'data'))
     parser.add_argument('--no_shuffle', action='store_true',
                         help='Use original ordered vectors instead of shuffled (pure AR baseline)')
+    parser.add_argument('--full_shuffle', action='store_true',
+                        help='Fully random shuffle main_vectors per sample each batch')
+    parser.add_argument('--data_shuffle', type=str, default=None,
+                        choices=['none', 'block', 'full'],
+                        help='Data shuffle mode (overrides --no_shuffle/--full_shuffle)')
     parser.add_argument('--n_layer', type=int, default=None)
     parser.add_argument('--n_embd', type=int, default=None)
+    parser.add_argument('--wandb_project', type=str, default=None)
     return parser.parse_args()
 
 
@@ -73,7 +79,18 @@ def main():
     learning_rate = args.learning_rate if args.learning_rate is not None else cfg.learning_rate
     seed = args.seed if args.seed is not None else cfg.seed
     device = args.device if args.device is not None else cfg.device
-    no_shuffle = args.no_shuffle
+    # Resolve data_shuffle mode
+    if args.data_shuffle is not None:
+        data_shuffle = args.data_shuffle
+    elif args.no_shuffle:
+        data_shuffle = 'none'
+    elif args.full_shuffle:
+        data_shuffle = 'full'
+    else:
+        data_shuffle = 'block'
+    no_shuffle = (data_shuffle == 'none')
+    full_shuffle = (data_shuffle == 'full')
+    wandb_project = args.wandb_project if args.wandb_project else cfg.wandb_project
 
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -81,7 +98,7 @@ def main():
         torch.cuda.manual_seed(seed)
 
     print("=" * 60)
-    print(f"ContinuousAOGPT — AR Training {'(no shuffle)' if no_shuffle else '(shuffled)'}")
+    print(f"ContinuousAOGPT — AR Training (data_shuffle={data_shuffle})")
     print("=" * 60)
 
     # Load data from disk (memmap, near-zero memory)
@@ -144,10 +161,10 @@ def main():
 
     if wandb_log:
         import wandb
-        run_name = 'ar-no-shuffle' if no_shuffle else 'ar-shuffled'
-        wandb.init(project=cfg.wandb_project, name=run_name, group='baseline-comparison', config={
-            'mode': 'AR',
-            'no_shuffle': no_shuffle,
+        run_name = f'ar-{data_shuffle}'
+        wandb.init(project=wandb_project, name=run_name, group='ar', config={
+            'model_type': 'AR',
+            'data_shuffle': data_shuffle,
             'vector_dim': vector_dim,
             'seq_length': seq_length,
             'n_layer': n_layer,
@@ -173,7 +190,16 @@ def main():
     for epoch in range(epochs):
         for batch in train_loader:
             init_vectors = batch['init_vectors'].to(device)
-            vectors = batch['main_vectors'].to(device) if no_shuffle else batch['shuffled_main'].to(device)
+            if no_shuffle:
+                vectors = batch['main_vectors'].to(device)
+            elif full_shuffle:
+                vectors = batch['main_vectors'].to(device)
+                B_v, t_v, D_v = vectors.shape
+                perms = torch.stack([torch.randperm(t_v, device=device) for _ in range(B_v)])
+                batch_idx = torch.arange(B_v, device=device).unsqueeze(1).expand(-1, t_v)
+                vectors = vectors[batch_idx, perms]
+            else:
+                vectors = batch['shuffled_main'].to(device)
 
             lr = get_lr(global_step, warmup_iters, max_iters, learning_rate)
             for param_group in optimizer.param_groups:
@@ -209,7 +235,7 @@ def main():
                     best_val_loss = eval_results['val_loss']
                     save_path = os.path.join(os.path.dirname(__file__), 'checkpoints')
                     os.makedirs(save_path, exist_ok=True)
-                    ckpt_name = 'best_ar_noshuffle_model.pt' if no_shuffle else 'best_ar_model.pt'
+                    ckpt_name = f'best_ar_{data_shuffle}_model.pt'
                     torch.save({
                         'model_state_dict': ema_model.state_dict(),
                         'raw_model_state_dict': model.state_dict(),
